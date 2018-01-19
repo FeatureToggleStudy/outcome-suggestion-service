@@ -1,7 +1,7 @@
 import { ExpressResponder } from "../drivers";
 import { DataStore, Responder } from "../../interfaces/interfaces";
 import { Router, Response } from 'express';
-import { SuggestionInteractor, LearningObjectInteractor } from '../../interactors/interactors'
+import { SuggestionInteractor } from '../../interactors/interactors'
 import { User, LearningObject } from "clark-entity";
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
@@ -9,11 +9,9 @@ const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 export class ExpressRouteDriver {
 
     private _SuggestionInteractor: SuggestionInteractor;
-    private _LearningObjectInteractor: LearningObjectInteractor;
 
     constructor(private dataStore: DataStore) {
         this._SuggestionInteractor = new SuggestionInteractor(dataStore);
-        this._LearningObjectInteractor = new LearningObjectInteractor(dataStore);
     }
 
     public static buildRouter(dataStore: DataStore): Router {

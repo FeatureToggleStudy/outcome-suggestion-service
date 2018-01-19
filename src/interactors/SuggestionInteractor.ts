@@ -5,7 +5,7 @@ import { DataStore, Responder, Interactor } from '../interfaces/interfaces';
 
 import {
     LearningObjectRecord, /* TODO: this import oughtn't be necessary */
-} from '../../schema/schema';
+} from 'clark-schema';
 
 import { ObjectSuggestion, OutcomeSuggestion } from 'clark-entity';
 
