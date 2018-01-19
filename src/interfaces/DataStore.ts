@@ -18,9 +18,12 @@ import {
 import { Cursor } from 'mongodb';
 
 export interface DataStore {
-fetchAllObjects(): Cursor<LearningObjectRecord>;
-fetchMultipleObjects(ids: LearningObjectID[]): Cursor<LearningObjectRecord>;
-suggestObjects(text: string, mode: suggestMode, threshold: number): Promise<ObjectSuggestion[]>;
-suggestOutcomes(text: string, mode: suggestMode, threshold: number): Promise<OutcomeSuggestion[]>;
-matchOutcomes(text: string): Cursor<OutcomeRecord>;
+    connect(dburistring): Promise<void>;
+    disconnect(): void;
+    fetchUser(id: UserID): Promise<UserRecord>;
+    fetchAllObjects(): Cursor<LearningObjectRecord>;
+    fetchMultipleObjects(ids: { username: string, learningObjectName: string }[]): Cursor<LearningObjectRecord>;
+    searchObjects(namestring, authorstring, lengthstring, levelstring, contentstring): Promise<LearningObjectRecord[]>;
+    searchOutcomes(textstring): Cursor<OutcomeRecord>;
+    matchOutcomes(textstring): Cursor<OutcomeRecord>;
 }

@@ -1,7 +1,7 @@
 
 import assertNever from 'assert-never';
 
-import { HashInterface, DataStore } from '../interfaces/interfaces';
+import { DataStore, Responder, Interactor } from '../interfaces/interfaces';
 
 import {
 
@@ -11,7 +11,17 @@ import {
 import { ObjectSuggestion, OutcomeSuggestion } from 'clark-entity';
 
 export type suggestMode = 'text' | 'regex';
-export class SuggestionInteractor {
+export class SuggestionInteractor implements Interactor {
+
+    private _responder: Responder;
+
+    public set responder(responder: Responder) {
+        this._responder = responder;
+    }
+
+    constructor(private dataStore: DataStore) { }
+
+
     /**
         * Search for outcomes related to a given text string.
         *
@@ -30,18 +40,18 @@ export class SuggestionInteractor {
         *
         * @returns {Outcome[]} list of outcome suggestions, ordered by score
         */
-    suggestOutcomes = async function (text: string, mode: suggestMode = 'text', threshold = 0): Promise<OutcomeSuggestion[]> {
+    async suggestOutcomes(text: string, mode: suggestMode = 'text', threshold = 0, filter): Promise<void> {
         try {
             let suggestions: OutcomeSuggestion[] = [];
 
             let cursor;
             switch (mode) {
                 case 'text':
-                    cursor = this.db.searchOutcomes(text)
+                    cursor = this.dataStore.searchOutcomes(text)
                         .sort({ score: { $meta: 'textScore' } });
                     break;
-                case 'regex': cursor = this.db.matchOutcomes(text); break;
-                default: return assertNever(mode);
+                case 'regex': cursor = this.dataStore.matchOutcomes(text); break;
+                default: this.responder.sendObject(assertNever(mode));
             }
 
             while (await cursor.hasNext()) {
@@ -73,9 +83,17 @@ export class SuggestionInteractor {
                 suggestions.push(suggestion);
             }
 
-            return Promise.resolve(suggestions);
+            let filtered = suggestions.filter((suggestion) => {
+                for (let prop in filter) {
+                    if (suggestion[prop] && suggestion[prop].indexOf(filter[prop]) < 0) {
+                        return false; // leave out suggestion if it doesn't contain filter text
+                    }
+                }
+                return true;
+            });
+            this.responder.sendObject(filtered);
         } catch (e) {
-            return Promise.reject(e);
+            this.responder.sendOperationError(e);
         }
     };
 
@@ -91,18 +109,18 @@ export class SuggestionInteractor {
      *
      * @returns {Outcome[]} list of outcome suggestions, ordered by score
      */
-    suggestObjects = async function (
+    async suggestObjects(
         name: string,
         author: string,
         length: string,
         level: string,
         content: string,
-    ): Promise<ObjectSuggestion[]> {
+    ): Promise<void> {
         try {
-            let objects: LearningObjectRecord[] = await this.db.searchObjects(name, author, length, level, content);
+            let objects: LearningObjectRecord[] = await this.dataStore.searchObjects(name, author, length, level, content);
             let suggestions: ObjectSuggestion[] = [];
             for (let object of objects) {
-                let owner = await this.db.fetchUser(object.author);
+                let owner = await this.dataStore.fetchUser(object.authorID);
                 suggestions.push({
                     id: object._id,
                     author: owner.name_,
@@ -111,9 +129,9 @@ export class SuggestionInteractor {
                     date: object.date,
                 });
             }
-            return Promise.resolve(suggestions);
+            this.responder.sendObject(suggestions);
         } catch (e) {
-            return Promise.reject(e);
+            this.responder.sendOperationError(e);
         }
     };
 }

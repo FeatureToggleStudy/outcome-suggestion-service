@@ -1,3 +1,7 @@
 import { SuggestionInteractor } from './SuggestionInteractor';
+import { LearningObjectInteractor } from './LearningObjectInteractor';
 
-export {SuggestionInteractor}
+export {
+    SuggestionInteractor,
+    LearningObjectInteractor
+}
