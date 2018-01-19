@@ -9,7 +9,7 @@ import {
     collectionFor,
     schemaFor,
     foreignData,
-} from '../../schema/db.schema';
+} from 'clark-schema';
 
 import {
     Record, Update, Insert, Edit,
@@ -23,7 +23,7 @@ import {
     StandardOutcomeSchema, StandardOutcomeRecord, StandardOutcomeUpdate,
     StandardOutcomeInsert, StandardOutcomeEdit,
     OutcomeRecord,
-} from '../../schema/schema';
+} from 'clark-schema';
 export { ObjectID as DBID };
 
 import { DataStore } from "../interfaces/DataStore";

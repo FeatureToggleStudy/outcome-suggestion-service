@@ -13,7 +13,7 @@ import {
     StandardOutcomeSchema, StandardOutcomeRecord, StandardOutcomeUpdate,
     StandardOutcomeInsert, StandardOutcomeEdit,
     OutcomeRecord,
-} from '../../schema/schema';
+} from 'clark-schema'
 
 import { Cursor } from 'mongodb';
 

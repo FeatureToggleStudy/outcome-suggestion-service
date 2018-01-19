@@ -2,7 +2,7 @@ import { DataStore, Responder, Interactor } from '../interfaces/interfaces';
 
 import {
     LearningObjectRecord, /* TODO: this import oughtn't be necessary */
-} from '../../schema/schema';
+} from 'clark-schema'
 
 import { LearningObject, User } from 'clark-entity';
 
@@ -23,7 +23,7 @@ export class LearningObjectInteractor implements Interactor {
             let records = await this.dataStore.fetchAllObjects().toArray();
             let objects: LearningObject[] = [];
             for (let doc of records) {
-                let authorRecord = await this.dataStore.fetchUser(doc.author);
+                let authorRecord = await this.dataStore.fetchUser(doc.authorID);
                 let author = new User(authorRecord.username, authorRecord.name_, null, null);
                 let object = new LearningObject(author, '');
                 object.name = doc.name_;
@@ -44,7 +44,7 @@ export class LearningObjectInteractor implements Interactor {
             let records = await this.dataStore.fetchMultipleObjects([]).toArray();
             let objects: LearningObject[] = [];
             for (let doc of records) {
-                let authorRecord = await this.dataStore.fetchUser(doc.author);
+                let authorRecord = await this.dataStore.fetchUser(doc.authorID);
                 let author = new User(authorRecord.username, authorRecord.name_, null, null);
                 let object = new LearningObject(author, '');
                 object.name = doc.name_;
