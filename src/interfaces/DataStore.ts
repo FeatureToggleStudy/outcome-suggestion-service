@@ -1,6 +1,3 @@
-
-
-
 import {
     Record, Update, Insert, Edit,
     RecordID, UserID, LearningObjectID, OutcomeID,

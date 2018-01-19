@@ -34,34 +34,9 @@ export class ExpressRouteDriver {
 
             //Set Responder
             this._SuggestionInteractor.responder = this.getResponder(res);
-
             await this._SuggestionInteractor.suggestOutcomes(text, 'text', threshold, filter);
         });
 
-        router.post('/suggestObjects', async (req, res) => {
-            let name = req.body.name;
-            let author = req.body.author;
-            let length = req.body.length;
-            let level = req.body.level;
-            let content = req.body.content;
-
-            //Set Responder
-            this._SuggestionInteractor.responder = this.getResponder(res);
-            await this._SuggestionInteractor.suggestObjects(name, author, length, level, content);
-        });
-
-        router.post('/fetchAllObjects', async (req, res) => {
-            //Set Responder
-            this._LearningObjectInteractor.responder = this.getResponder(res);
-            await this._LearningObjectInteractor.fetchAllObjects();
-        });
-
-        router.post('/fetchMultipleObjects', async (req, res) => {
-            let ids = req.body.ids;
-            this._LearningObjectInteractor.responder = this.getResponder(res);
-
-            await this._LearningObjectInteractor.fetchMultipleObjects(ids);
-        });
 
     }
 }
