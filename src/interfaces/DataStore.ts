@@ -18,12 +18,9 @@ import {
 import { Cursor } from 'mongodb';
 
 export interface DataStore {
-    connect(dburistring): Promise<void>;
+    connect(dburi: string): Promise<void>;
     disconnect(): void;
     fetchUser(id: UserID): Promise<UserRecord>;
-    fetchAllObjects(): Cursor<LearningObjectRecord>;
-    fetchMultipleObjects(ids: { username: string, learningObjectName: string }[]): Cursor<LearningObjectRecord>;
-    searchObjects(namestring, authorstring, lengthstring, levelstring, contentstring): Promise<LearningObjectRecord[]>;
-    searchOutcomes(textstring): Cursor<OutcomeRecord>;
-    matchOutcomes(textstring): Cursor<OutcomeRecord>;
+    searchOutcomes(text: string): Cursor<OutcomeRecord>;
+    matchOutcomes(text: string): Cursor<OutcomeRecord>;
 }
