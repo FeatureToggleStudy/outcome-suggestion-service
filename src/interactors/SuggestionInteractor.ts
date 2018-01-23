@@ -5,9 +5,9 @@ import { DataStore, Responder, Interactor } from '../interfaces/interfaces';
 
 import {
     LearningObjectRecord, /* TODO: this import oughtn't be necessary */
-} from 'clark-schema';
+} from '@cyber4all/clark-schema';
 
-import { ObjectSuggestion, OutcomeSuggestion } from 'clark-entity';
+import { ObjectSuggestion, OutcomeSuggestion } from '@cyber4all/clark-entity';
 
 export type suggestMode = 'text' | 'regex';
 export class SuggestionInteractor implements Interactor {
@@ -38,10 +38,9 @@ export class SuggestionInteractor implements Interactor {
         *
         * @returns {Outcome[]} list of outcome suggestions, ordered by score
         */
-    async suggestOutcomes(text: string, mode: suggestMode = 'text', threshold = 0, filter): Promise<void> {
+    async suggestOutcomes(text: string, mode: suggestMode = 'text', threshold: number = 0, filter:any): Promise<void> {
         try {
             let suggestions: OutcomeSuggestion[] = [];
-
             let cursor;
             switch (mode) {
                 case 'text':
@@ -49,7 +48,7 @@ export class SuggestionInteractor implements Interactor {
                         .sort({ score: { $meta: 'textScore' } });
                     break;
                 case 'regex': cursor = this.dataStore.matchOutcomes(text); break;
-                default: this.responder.sendObject(assertNever(mode));
+                default: this._responder.sendObject(assertNever(mode));
             }
 
             while (await cursor.hasNext()) {
@@ -89,9 +88,9 @@ export class SuggestionInteractor implements Interactor {
                 }
                 return true;
             });
-            this.responder.sendObject(filtered);
+            this._responder.sendObject(filtered);
         } catch (e) {
-            this.responder.sendOperationError(e);
+            this._responder.sendOperationError(e);
         }
     };
 }

@@ -29,7 +29,6 @@ export class ExpressRouteDriver {
         router.post('/suggestOutcomes', async (req, res) => {
             let text = req.body.text;
             let filter = req.body.filter;
-
             //Set Responder
             this._SuggestionInteractor.responder = this.getResponder(res);
             await this._SuggestionInteractor.suggestOutcomes(text, 'text', threshold, filter);
