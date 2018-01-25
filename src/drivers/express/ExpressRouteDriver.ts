@@ -2,7 +2,7 @@ import { ExpressResponder } from "../drivers";
 import { DataStore, Responder } from "../../interfaces/interfaces";
 import { Router, Response } from 'express';
 import { SuggestionInteractor } from '../../interactors/interactors'
-import { User, LearningObject } from "clark-entity";
+import { User, LearningObject } from "@cyber4all/clark-entity";
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 

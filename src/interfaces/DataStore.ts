@@ -10,7 +10,7 @@ import {
     StandardOutcomeSchema, StandardOutcomeRecord, StandardOutcomeUpdate,
     StandardOutcomeInsert, StandardOutcomeEdit,
     OutcomeRecord,
-} from 'clark-schema'
+} from '@cyber4all/clark-schema'
 
 import { Cursor } from 'mongodb';
 

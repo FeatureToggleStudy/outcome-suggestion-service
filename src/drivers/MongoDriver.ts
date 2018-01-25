@@ -9,9 +9,6 @@ import {
     collectionFor,
     schemaFor,
     foreignData,
-} from 'clark-schema';
-
-import {
     Record, Update, Insert, Edit,
     RecordID, UserID, LearningObjectID, OutcomeID,
     LearningOutcomeID, StandardOutcomeID,
@@ -23,7 +20,8 @@ import {
     StandardOutcomeSchema, StandardOutcomeRecord, StandardOutcomeUpdate,
     StandardOutcomeInsert, StandardOutcomeEdit,
     OutcomeRecord,
-} from 'clark-schema';
+} from '@cyber4all/clark-schema';
+
 export { ObjectID as DBID };
 
 import { DataStore } from "../interfaces/DataStore";
