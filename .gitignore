@@ -4,3 +4,4 @@
 /dbcontent/rawdata
 /ts/script/db.test.ts
 dist/
+.env
