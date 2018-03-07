@@ -1,5 +1,3 @@
 import { SuggestionInteractor } from './SuggestionInteractor';
 
-export {
-    SuggestionInteractor,
-}
+export { SuggestionInteractor };

@@ -1,5 +1,5 @@
 import { ExpressDriver, MongoDriver } from './drivers/drivers';
-import { DataStore} from './interfaces/interfaces';
+import { DataStore } from './interfaces/interfaces';
 
 // ----------------------------------------------------------------------------------
 // Initializations
