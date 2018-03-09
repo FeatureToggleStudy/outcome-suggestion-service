@@ -23,7 +23,11 @@ export class ExpressRouteDriver {
   private setRoutes(router: Router): void {
     router.get('/outcomes', async (req, res) => {
       let text = req.query.text;
-      let filter = req.query.filter;
+      let filter = {
+        author: req.query.author,
+        name: req.query.name,
+        date: req.query.date
+      };
 
       await SuggestionInteractor.suggestOutcomes(
         this.dataStore,
