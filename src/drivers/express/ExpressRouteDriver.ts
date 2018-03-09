@@ -5,6 +5,7 @@ import { SuggestionInteractor } from '../../interactors/interactors';
 import { User, LearningObject } from '@cyber4all/clark-entity';
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
+const version = require('../../package.json').version;
 
 export class ExpressRouteDriver {
   constructor(private dataStore: DataStore) {}
@@ -21,6 +22,12 @@ export class ExpressRouteDriver {
   }
 
   private setRoutes(router: Router): void {
+    router.get('/', async (req, res) => {
+      res.json({
+        version,
+        message: `Welcome to the Learning Outcome Suggestion' API v${version}`
+      });
+    });
     router.get('/outcomes', async (req, res) => {
       let text = req.query.text;
       let filter = {
