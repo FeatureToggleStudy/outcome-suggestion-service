@@ -31,11 +31,13 @@ export class ExpressRouteDriver {
     router.get('/outcomes', async (req, res) => {
       let text = req.query.text;
       let filter = {
-        author: req.query.author,
+        source: req.query.author,
         name: req.query.name,
         date: req.query.date
       };
-
+      for (let prop in filter) {
+        if (!filter[prop]) delete filter[prop];
+      }
       await SuggestionInteractor.suggestOutcomes(
         this.dataStore,
         this.getResponder(res),

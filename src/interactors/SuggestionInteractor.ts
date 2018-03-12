@@ -33,7 +33,7 @@ export class SuggestionInteractor {
     filter: any
   ): Promise<void> {
     try {
-      let suggestions: OutcomeSuggestion[] = [];
+      let suggestions = [];
       let cursor;
       switch (mode) {
         case 'text':
@@ -52,7 +52,7 @@ export class SuggestionInteractor {
         let doc = await cursor.next();
         let suggestion = {
           id: doc._id,
-          author: doc.author,
+          source: doc.source,
           name: doc.name,
           date: doc.date,
           outcome: doc.outcome
