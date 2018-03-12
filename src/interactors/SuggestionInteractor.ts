@@ -52,6 +52,7 @@ export class SuggestionInteractor {
         let doc = await cursor.next();
         let suggestion = {
           id: doc._id,
+          author: doc.author,
           source: doc.source,
           name: doc.name,
           date: doc.date,
