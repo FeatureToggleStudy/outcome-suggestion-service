@@ -2,8 +2,6 @@ import assertNever from 'assert-never';
 
 import { DataStore, Responder } from '../interfaces/interfaces';
 
-import { ObjectSuggestion, OutcomeSuggestion } from '@cyber4all/clark-entity';
-
 export type suggestMode = 'text' | 'regex';
 export class SuggestionInteractor {
   /**
@@ -30,9 +28,14 @@ export class SuggestionInteractor {
     text: string,
     mode: suggestMode = 'text',
     threshold: number = 0,
-    filter: any
+    filter: any,
+    page?: number,
+    limit?: number
   ): Promise<void> {
     try {
+      if (page !== undefined && page <= 0) page = 1;
+      let skip = page && limit ? (page - 1) * limit : undefined;
+
       let suggestions = [];
       let cursor;
       switch (mode) {
@@ -47,6 +50,11 @@ export class SuggestionInteractor {
         default:
           responder.sendObject(assertNever(mode));
       }
+
+      cursor =
+        skip !== undefined
+          ? cursor.skip(skip).limit(limit)
+          : limit ? cursor.limit(limit) : cursor;
 
       while (await cursor.hasNext()) {
         let doc = await cursor.next();

@@ -35,6 +35,9 @@ export class ExpressRouteDriver {
         name: req.query.name,
         date: req.query.date
       };
+      let page = req.query.page ? +req.query.page : undefined;
+      let limit = req.query.limit ? +req.query.limit : undefined;
+
       for (let prop in filter) {
         if (!filter[prop]) delete filter[prop];
       }
@@ -44,7 +47,9 @@ export class ExpressRouteDriver {
         text,
         'text',
         threshold,
-        filter
+        filter,
+        page,
+        limit
       );
     });
   }
