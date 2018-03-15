@@ -51,6 +51,7 @@ export class SuggestionInteractor {
           responder.sendObject(assertNever(mode));
       }
 
+      let total = cursor.count();
       cursor =
         skip !== undefined
           ? cursor.skip(skip).limit(limit)
@@ -93,7 +94,7 @@ export class SuggestionInteractor {
         }
         return true;
       });
-      responder.sendObject(filtered);
+      responder.sendObject({ outcomes: filtered, total: total });
     } catch (e) {
       responder.sendOperationError(e);
     }
