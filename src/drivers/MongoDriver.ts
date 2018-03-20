@@ -191,7 +191,8 @@ export class MongoDriver implements DataStore {
             { $match: query },
             {
               $project: {
-                _id: 1,
+                _id: 0,
+                id: '$_id',
                 author: 1,
                 name: 1,
                 date: 1,
