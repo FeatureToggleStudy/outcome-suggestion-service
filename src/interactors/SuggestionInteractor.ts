@@ -1,102 +1,86 @@
 import assertNever from 'assert-never';
 
 import { DataStore, Responder } from '../interfaces/interfaces';
+import { suggestMode, OutcomeFilter } from '../interfaces/DataStore';
 
-export type suggestMode = 'text' | 'regex';
 export class SuggestionInteractor {
   /**
-   * Search for outcomes related to a given text string.
+   * Suggests Outcomes
    *
-   * FIXME: We may want to transform this into a streaming algorithm,
-   *       rather than waiting for schema -> entity conversion
-   *       for the entire list. I don't know if there's a good way
-   *       to do that, but the terms 'Buffer' and 'Readable' seem
-   *       vaguely promising.
-   *
-   * @param {string} text the words to search for
-   * @param {suggestMode} mode which suggestion mode to use:
-   *      'text' - uses mongo's native text search query
-   *      'regex' - matches outcomes containing each word in text
-   * @param {number} threshold minimum score to include in results
-   *      (ignored if mode is 'regex')
-   *
-   * @returns {Outcome[]} list of outcome suggestions, ordered by score
+   * @static
+   * @param {DataStore} dataStore
+   * @param {Responder} responder
+   * @param {OutcomeFilter} filter
+   * @param {suggestMode} [mode='text']
+   * @param {number} [threshold=0]
+   * @param {number} [limit]
+   * @param {number} [page]
+   * @returns {Promise<void>}
+   * @memberof SuggestionInteractor
    */
   public static async suggestOutcomes(
     dataStore: DataStore,
     responder: Responder,
-    text: string,
+    filter: OutcomeFilter,
     mode: suggestMode = 'text',
     threshold: number = 0,
-    filter: any,
-    page?: number,
-    limit?: number
+    limit?: number,
+    page?: number
   ): Promise<void> {
     try {
-      if (page !== undefined && page <= 0) page = 1;
-      let skip = page && limit ? (page - 1) * limit : undefined;
-
-      let suggestions = [];
-      let cursor;
-      switch (mode) {
-        case 'text':
-          cursor = await dataStore
-            .searchOutcomes(text)
-            .sort({ score: { $meta: 'textScore' } });
-          break;
-        case 'regex':
-          cursor = await dataStore.matchOutcomes(text);
-          break;
-        default:
-          responder.sendObject(assertNever(mode));
-      }
-
-      let total = cursor.count();
-      cursor =
-        skip !== undefined
-          ? cursor.skip(skip).limit(limit)
-          : limit ? cursor.limit(limit) : cursor;
-
-      while (await cursor.hasNext()) {
-        let doc = await cursor.next();
-        let suggestion = {
-          id: doc._id,
-          author: doc.author,
-          source: doc.source,
-          name: doc.name,
-          date: doc.date,
-          outcome: doc.outcome
-        };
-
-        // if mode provides scoring information
-        if (doc['score'] !== undefined) {
-          let score = doc['score'];
-
-          // skip record if score is lower than threshold
-          if (score < threshold) break;
-
-          /*
-                     * TODO: Look into sorting options. An streaming insert
-                     *       sort here may be better than mongo's,
-                     *       if such a thing is possible
-                     * In that case, switch break above to continue.
-                     */
-        }
-
-        suggestions.push(suggestion);
-      }
-
-      let filtered = suggestions.filter(suggestion => {
-        for (let prop in filter) {
-          if (suggestion[prop] && suggestion[prop].indexOf(filter[prop]) < 0) {
-            return false; // leave out suggestion if it doesn't contain filter text
-          }
-        }
-        return true;
-      });
-      responder.sendObject({ outcomes: filtered, total: total });
+      filter = this.sanitizeFilter(filter);
+      let suggestions = await dataStore.suggestOutcomes(
+        filter,
+        mode,
+        threshold,
+        limit,
+        page
+      );
+      responder.sendObject(suggestions);
     } catch (e) {
-      responder.sendOperationError(e);
+      responder.sendOperationError(`Problem suggesting outcomes. Error: ${e}.`);
     }
+  }
+  /**
+   * Searches Outcomes
+   *
+   * @static
+   * @param {DataStore} dataStore
+   * @param {Responder} responder
+   * @param {OutcomeFilter} filter
+   * @param {number} [limit]
+   * @param {number} [page]
+   * @returns {Promise<void>}
+   * @memberof SuggestionInteractor
+   */
+  public static async searchOutcomes(
+    dataStore: DataStore,
+    responder: Responder,
+    filter: OutcomeFilter,
+    limit?: number,
+    page?: number
+  ): Promise<void> {
+    try {
+      filter = this.sanitizeFilter(filter);
+      let suggestions = await dataStore.searchOutcomes(filter, limit, page);
+      responder.sendObject(suggestions);
+    } catch (e) {
+      responder.sendOperationError(`Problem searching outcomes. Error: ${e}.`);
+    }
+  }
+  /**
+   * Removes undefined propeties in Outcome Filter
+   *
+   * @private
+   * @static
+   * @param {OutcomeFilter} filter
+   * @returns {OutcomeFilter}
+   * @memberof SuggestionInteractor
+   */
+  private static sanitizeFilter(filter: OutcomeFilter): OutcomeFilter {
+    for (let prop in filter) {
+      if (!filter[prop]) delete filter[prop];
+    }
+    return filter;
   }
 }

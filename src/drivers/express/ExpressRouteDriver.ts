@@ -3,6 +3,7 @@ import { DataStore, Responder } from '../../interfaces/interfaces';
 import { Router, Response } from 'express';
 import { SuggestionInteractor } from '../../interactors/interactors';
 import { User, LearningObject } from '@cyber4all/clark-entity';
+import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 const version = require('../../package.json').version;
@@ -29,28 +30,52 @@ export class ExpressRouteDriver {
       });
     });
     router.get('/outcomes', async (req, res) => {
-      let text = req.query.text;
-      let filter = {
-        source: req.query.author,
-        name: req.query.name,
-        date: req.query.date
-      };
-      let page = req.query.page ? +req.query.page : undefined;
-      let limit = req.query.limit ? +req.query.limit : undefined;
-
-      for (let prop in filter) {
-        if (!filter[prop]) delete filter[prop];
+      try {
+        let filter: OutcomeFilter = {
+          text: req.query.text ? req.query.text : '',
+          source: req.query.author,
+          name: req.query.name,
+          date: req.query.date
+        };
+        let page = req.query.page ? +req.query.page : undefined;
+        let limit = req.query.limit ? +req.query.limit : undefined;
+        await SuggestionInteractor.searchOutcomes(
+          this.dataStore,
+          this.getResponder(res),
+          filter,
+          page,
+          limit
+        );
+      } catch (e) {
+        console.log(e);
       }
-      await SuggestionInteractor.suggestOutcomes(
-        this.dataStore,
-        this.getResponder(res),
-        text,
-        'text',
-        threshold,
-        filter,
-        page,
-        limit
-      );
+    });
+    router.get('/outcomes/suggest', async (req, res) => {
+      try {
+        const suggestMode: suggestMode = 'text';
+        const threshold: number = process.env.SUGGESTION_THRESHOLD
+          ? +process.env.SUGGESTION_THRESHOLD
+          : 0;
+        let filter: OutcomeFilter = {
+          text: req.query.text ? req.query.text : '',
+          source: req.query.author,
+          name: req.query.name,
+          date: req.query.date
+        };
+        let page = req.query.page ? +req.query.page : undefined;
+        let limit = req.query.limit ? +req.query.limit : undefined;
+        await SuggestionInteractor.suggestOutcomes(
+          this.dataStore,
+          this.getResponder(res),
+          filter,
+          suggestMode,
+          threshold,
+          limit,
+          page
+        );
+      } catch (e) {
+        console.log(e);
+      }
     });
   }
 }

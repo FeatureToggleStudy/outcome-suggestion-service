@@ -2,9 +2,10 @@ import { MongoClient, Db, Cursor, ObjectID } from 'mongodb';
 
 export { ObjectID as DBID };
 
-import { DataStore } from '../interfaces/DataStore';
+import { DataStore } from '../interfaces/interfaces';
 import * as dotenv from 'dotenv';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
+import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
 dotenv.config();
 
 export interface Collection {
@@ -119,47 +120,100 @@ export class MongoDriver implements DataStore {
     this.db.close();
   }
 
-  /////////////////
-  // TEXT SEARCH //
-  /////////////////
+  public async searchOutcomes(
+    filter: OutcomeFilter,
+    limit?: number,
+    page?: number
+  ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
+    try {
+      if (page !== undefined && page <= 0) page = 1;
+      let skip = page && limit ? (page - 1) * limit : undefined;
+      // let query: any = { $text: { $search: filter.text } };
+      let query: any = { outcome: { $regex: new RegExp(filter.text, 'ig') } };
+      delete filter.text;
+      for (let prop in filter) {
+        query[prop] = { $regex: new RegExp(filter[prop], 'ig') };
+      }
+      let docs = await this.db
+        .collection(COLLECTIONS.StandardOutcome.name)
+        .find(query);
 
-  /**
-   * Find outcomes matching a text query.
-   * This variant uses Mongo's fancy text query. Questionable results.
-   * NOTE: this function also projects a score onto the cursor documents
-   *
-   * @param {string} text the words to search for
-   *
-   * @returns {Cursor<StandardOutcomeDocument>} cursor of positive matches
-   */
-  searchOutcomes(text: string): Cursor<StandardOutcomeDocument> {
-    return this.db
-      .collection(COLLECTIONS.StandardOutcome.name)
-      .find<StandardOutcomeDocument>(
-        { $text: { $search: text } },
-        { score: { $meta: 'textScore' } }
-      );
-  }
+      let total = await docs.count();
 
-  /**
-   * Find outcomes matching a text query.
-   * This variant finds all outcomes containing every word in the query.
-   * @param {string} text the words to match against
-   *
-   * @returns {Cursor<StandardOutcomeDocument>} cursor of positive matches
-   */
-  matchOutcomes(text: string): Cursor<StandardOutcomeDocument> {
-    let tokens = text.split(/\s/);
-    let docs: any[] = [];
-    for (let token of tokens) {
-      docs.push({ outcome: { $regex: token } });
+      docs =
+        skip !== undefined
+          ? docs.skip(skip).limit(limit)
+          : limit ? docs.limit(limit) : docs;
+
+      let outcomes = await docs.toArray();
+      return { total: total, outcomes: outcomes };
+    } catch (e) {
+      return Promise.reject(e);
     }
+  }
+  public async suggestOutcomes(
+    filter: OutcomeFilter,
+    mode: suggestMode,
+    threshold: number,
+    limit?: number,
+    page?: number
+  ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
+    try {
+      if (page !== undefined && page <= 0) page = 1;
+      let skip = page && limit ? (page - 1) * limit : undefined;
 
-    // score property is not projected, will be undefined in documents
-    return this.db
-      .collection(COLLECTIONS.StandardOutcome.name)
-      .find<StandardOutcomeDocument>({
-        $and: docs
-      });
+      if (mode === 'text') {
+        let text = `${filter.text ? filter.text : ''}`;
+        delete filter.text;
+
+        let query: any = { $text: { $search: text } };
+
+        if (filter.name) query.name = { $regex: new RegExp(filter.name, 'ig') };
+        delete filter.name;
+
+        if (filter.source)
+          query.source = { $regex: new RegExp(filter.source, 'ig') };
+        delete filter.source;
+
+        for (let prop in filter) {
+          query[prop] = filter[prop];
+        }
+
+        let docs = await this.db
+          .collection(COLLECTIONS.StandardOutcome.name)
+          .aggregate([
+            { $match: query },
+            {
+              $project: {
+                _id: 1,
+                author: 1,
+                name: 1,
+                date: 1,
+                outcome: 1,
+                source: 1,
+                tag: 1,
+                score: { $meta: 'textScore' }
+              }
+            },
+            { $match: { score: { $gt: threshold } } }
+          ])
+          .sort({ score: { $meta: 'textScore' } });
+
+        let arr = await docs.toArray();
+        let total = arr.length;
+
+        docs =
+          skip !== undefined
+            ? docs.skip(skip).limit(limit)
+            : limit ? docs.limit(limit) : docs;
+
+        let outcomes = await docs.toArray();
+        return { total: total, outcomes: outcomes };
+      } else {
+        //TODO: Match via regex if requirement is different from basic searching....
+      }
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 }
