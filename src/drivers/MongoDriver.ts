@@ -3,9 +3,10 @@ import { MongoClient, Db, Cursor, ObjectID } from 'mongodb';
 export { ObjectID as DBID };
 
 import { DataStore } from '../interfaces/interfaces';
-import * as dotenv from 'dotenv';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
 import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
+import * as stemmer from 'stemmer';
+import * as dotenv from 'dotenv';
 dotenv.config();
 
 export interface Collection {
@@ -163,7 +164,12 @@ export class MongoDriver implements DataStore {
       let skip = page && limit ? (page - 1) * limit : undefined;
 
       if (mode === 'text') {
-        let text = `${filter.text ? filter.text : ''}`;
+        let text = `${filter.text ? filter.text : ''}`.trim();
+        text = text
+          .split(' ')
+          .map(word => stemmer(word))
+          .join(' ');
+        console.log('STEMMED: ', text);
         delete filter.text;
 
         let query: any = { $text: { $search: text } };
