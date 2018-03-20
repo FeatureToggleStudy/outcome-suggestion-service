@@ -147,6 +147,11 @@ export class MongoDriver implements DataStore {
           : limit ? docs.limit(limit) : docs;
 
       let outcomes = await docs.toArray();
+      outcomes = outcomes.map(outcome => {
+        outcome.id = outcome._id;
+        delete outcome._id;
+        return outcome;
+      });
       return { total: total, outcomes: outcomes };
     } catch (e) {
       return Promise.reject(e);
