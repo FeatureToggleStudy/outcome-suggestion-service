@@ -1,5 +1,3 @@
-import assertNever from 'assert-never';
-
 import { DataStore, Responder } from '../interfaces/interfaces';
 import { suggestMode, OutcomeFilter } from '../interfaces/DataStore';
 
