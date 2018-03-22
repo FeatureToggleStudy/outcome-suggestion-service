@@ -1,5 +1,7 @@
 import { DataStore, Responder } from '../interfaces/interfaces';
 import { suggestMode, OutcomeFilter } from '../interfaces/DataStore';
+import * as spellcheck from 'spellchecker';
+import * as stemmer from 'stemmer';
 
 export class SuggestionInteractor {
   /**
@@ -79,6 +81,42 @@ export class SuggestionInteractor {
     for (let prop in filter) {
       if (!filter[prop]) delete filter[prop];
     }
+    if (filter.text) {
+      filter.text = this.correctSpellings(filter.text);
+    }
     return filter;
+  }
+
+  private static correctSpellings(text: string): string {
+    let fixedTxt = text;
+    let corrections = spellcheck.checkSpelling(text);
+    for (let pos of corrections) {
+      let old = text.substring(pos.start, pos.end);
+      let possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);
+      let fixed = this.getHighestScoredCorrection(possibleCorrections);
+      fixedTxt = fixedTxt.replace(old, fixed);
+    }
+    return fixedTxt;
+  }
+
+  private static getHighestScoredCorrection(possible: string[]): string {
+    let scores: Map<string, number> = new Map<string, number>();
+    for (let word of possible) {
+      let stem = stemmer(word);
+      if (scores.has(stem)) {
+        let oldScore = scores.get(stem);
+        scores.set(stem, ++oldScore);
+      } else {
+        scores.set(stem, 1);
+      }
+    }
+    let correction = { word: '', score: 0 };
+    scores.forEach((score, word) => {
+      if (score > correction.score) {
+        correction.score = score;
+        correction.word = word;
+      }
+    });
+    return correction.word;
   }
 }
