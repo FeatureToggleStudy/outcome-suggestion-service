@@ -8,7 +8,7 @@
     "build": "node_modules/.bin/gulp tsc",
     "gulp-tsc": "node_modules/.bin/gulp start",
     "pack": "npm run build && cp ./package.json ./dist && cd ./dist && zip -r ../dist.zip  ./* & cd ..",
-    "deploy": "eb deploy Learning-Outcome-Suggestion-Production --profile clark --label Standard Outcome Suggestion v$(node -p \"require('./package.json').version\")"
+    "deploy": "eb deploy Learning-Outcome-Suggestion-Production --profile clark --label Standard-Outcome-Suggestion-v$(node -p \"require('./package.json').version\")"
   },
   "repository": {
     "type": "git",
