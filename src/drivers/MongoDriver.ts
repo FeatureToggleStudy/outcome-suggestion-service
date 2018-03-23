@@ -5,7 +5,6 @@ export { ObjectID as DBID };
 import { DataStore } from '../interfaces/interfaces';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
 import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
-import * as stemmer from 'stemmer';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -106,7 +105,13 @@ export class MongoDriver implements DataStore {
             .replace(/<DB_NAME>/g, process.env.CLARK_DB_NAME);
     this.connect(dburi);
   }
-
+  /**
+   * Connect to MongoDB
+   *
+   * @param {*} dburi
+   * @returns {Promise<void>}
+   * @memberof MongoDriver
+   */
   async connect(dburi: any): Promise<void> {
     try {
       this.db = await MongoClient.connect(dburi);
@@ -117,10 +122,23 @@ export class MongoDriver implements DataStore {
       );
     }
   }
+  /**
+   * Disconnect from Mongo
+   *
+   * @memberof MongoDriver
+   */
   disconnect(): void {
     this.db.close();
   }
-
+  /**
+   * Performs regex search on Outcomes with provided fields
+   *
+   * @param {OutcomeFilter} filter
+   * @param {number} [limit]
+   * @param {number} [page]
+   * @returns {Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>}
+   * @memberof MongoDriver
+   */
   public async searchOutcomes(
     filter: OutcomeFilter,
     limit?: number,
@@ -157,6 +175,17 @@ export class MongoDriver implements DataStore {
       return Promise.reject(e);
     }
   }
+  /**
+   * Suggests outcomes based on user input
+   *
+   * @param {OutcomeFilter} filter
+   * @param {suggestMode} mode
+   * @param {number} threshold
+   * @param {number} [limit]
+   * @param {number} [page]
+   * @returns {Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>}
+   * @memberof MongoDriver
+   */
   public async suggestOutcomes(
     filter: OutcomeFilter,
     mode: suggestMode,
@@ -169,12 +198,7 @@ export class MongoDriver implements DataStore {
       let skip = page && limit ? (page - 1) * limit : undefined;
 
       if (mode === 'text') {
-        let text = `${filter.text ? filter.text : ''}`.trim();
-        text = text
-          .split(' ')
-          .map(word => stemmer(word))
-          .join(' ');
-        console.log('STEMMED: ', text);
+        let text = filter.text;
         delete filter.text;
 
         let query: any = { $text: { $search: text } };

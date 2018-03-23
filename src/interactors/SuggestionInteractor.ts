@@ -1,6 +1,7 @@
 import { DataStore, Responder } from '../interfaces/interfaces';
 import { suggestMode, OutcomeFilter } from '../interfaces/DataStore';
 import * as spellcheck from 'spellchecker';
+import * as stopword from 'stopword';
 import * as stemmer from 'stemmer';
 
 export class SuggestionInteractor {
@@ -29,6 +30,9 @@ export class SuggestionInteractor {
   ): Promise<void> {
     try {
       filter = this.sanitizeFilter(filter);
+      filter.text = this.removeStopwords(filter.text);
+      filter.text = this.stemWords(filter.text);
+      console.log('FILTER: ', filter);
       let suggestions = await dataStore.suggestOutcomes(
         filter,
         mode,
@@ -82,27 +86,46 @@ export class SuggestionInteractor {
       if (!filter[prop]) delete filter[prop];
     }
     if (filter.text) {
+      filter.text = filter.text.trim();
       filter.text = this.correctSpellings(filter.text);
+    } else {
+      filter.text = '';
     }
     return filter;
   }
-
+  /**
+   * Replaces misspelled word with highest weighted stemmed correction
+   *
+   * @private
+   * @static
+   * @param {string} text
+   * @returns {string}
+   * @memberof SuggestionInteractor
+   */
   private static correctSpellings(text: string): string {
     let fixedTxt = text;
     let corrections = spellcheck.checkSpelling(text);
     for (let pos of corrections) {
       let old = text.substring(pos.start, pos.end);
       let possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);
-      let fixed = this.getHighestScoredCorrection(possibleCorrections);
+      let fixed = this.getHighestWeightedCorrection(possibleCorrections);
       fixedTxt = fixedTxt.replace(old, fixed);
     }
     return fixedTxt;
   }
-
-  private static getHighestScoredCorrection(possible: string[]): string {
+  /**
+   * Gets stem of each correction and assigns weights based on frequency of stem.
+   *
+   * @private
+   * @static
+   * @param {string[]} possible
+   * @returns {string}
+   * @memberof SuggestionInteractor
+   */
+  private static getHighestWeightedCorrection(possible: string[]): string {
     let scores: Map<string, number> = new Map<string, number>();
     for (let word of possible) {
-      let stem = stemmer(word);
+      let stem = this.stemWords(word);
       if (scores.has(stem)) {
         let oldScore = scores.get(stem);
         scores.set(stem, ++oldScore);
@@ -118,5 +141,40 @@ export class SuggestionInteractor {
       }
     });
     return correction.word;
+  }
+  /**
+   * Returns stems for words in a string
+   *
+   * @private
+   * @static
+   * @param {string} text
+   * @returns {string}
+   * @memberof SuggestionInteractor
+   */
+  private static stemWords(text: string): string {
+    text = text
+      .split(' ')
+      .map(word => stemmer(word))
+      .join(' ')
+      .trim();
+    return text;
+  }
+
+  /**
+   * Returns string without stopwords
+   *
+   * @private
+   * @static
+   * @param {string} text
+   * @returns {string}
+   * @memberof SuggestionInteractor
+   */
+  private static removeStopwords(text: string): string {
+    let oldString = text.split(' ');
+    text = stopword
+      .removeStopwords(oldString)
+      .join(' ')
+      .trim();
+    return text;
   }
 }
