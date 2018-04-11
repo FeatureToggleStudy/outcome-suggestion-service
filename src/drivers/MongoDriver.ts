@@ -112,14 +112,17 @@ export class MongoDriver implements DataStore {
    * @returns {Promise<void>}
    * @memberof MongoDriver
    */
-  async connect(dburi: any): Promise<void> {
+  async connect(dbURI: string, retryAttempt?: number): Promise<void> {
     try {
-      this.db = await MongoClient.connect(dburi);
-      return Promise.resolve();
+      this.db = await MongoClient.connect(dbURI);
     } catch (e) {
-      return Promise.reject(
-        'Problem connecting to database at ' + dburi + ':\n\t' + e
-      );
+      if (!retryAttempt) {
+        this.connect(dbURI, 1);
+      } else {
+        return Promise.reject(
+          'Problem connecting to database at ' + dbURI + ':\n\t' + e
+        );
+      }
     }
   }
   /**
