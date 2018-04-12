@@ -31,6 +31,7 @@
     "mongodb": "^2.2.31",
     "morgan": "^1.9.0",
     "node-env-file": "^0.1.8",
+    "pdffiller-stream": "^0.2.0",
     "source-map-support": "^0.5.0",
     "spellchecker": "^3.4.4",
     "stemmer": "^1.0.2",
