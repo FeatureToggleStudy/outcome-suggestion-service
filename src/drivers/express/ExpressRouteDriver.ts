@@ -79,7 +79,7 @@ export class ExpressRouteDriver {
         console.log(e);
       }
     });
-
+    // FIXME: Remove from Outcome Suggestion if feature is removed or expanded
     router.get('/users/:username/cards', async (req, res) => {
       try {
         const first_name = req.query.fname;
