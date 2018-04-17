@@ -12,7 +12,7 @@ export class ExpressDriver {
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(bodyParser.json());
 
-    //Setup route logger
+    // Setup route logger
     this.app.use(logger('dev'));
 
     // set header to allow connection by given url
@@ -23,13 +23,13 @@ export class ExpressDriver {
       // Request methods you wish to allow
       res.header(
         'Access-Control-Allow-Methods',
-        'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+        'GET, POST, OPTIONS, PUT, PATCH, DELETE',
       );
 
       // Request headers you wish to allow
       res.header(
         'Access-Control-Allow-Headers',
-        'X-Requested-With,content-type'
+        'X-Requested-With,content-type',
       );
 
       // Set to true if you need the website to include cookies in the requests sent
@@ -58,7 +58,7 @@ export class ExpressDriver {
      * Listen on provided port, on all network interfaces.
      */
     server.listen(port, () =>
-      console.log(`Outcome Suggestion Service running on localhost:${port}`)
+      console.log(`Outcome Suggestion Service running on localhost:${port}`),
     );
 
     return this.app;
