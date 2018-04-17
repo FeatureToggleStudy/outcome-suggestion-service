@@ -7,11 +7,15 @@ export class ExpressResponder implements Responder {
   }
   sendOperationError(
     error: string = 'Server error encounter.',
-    status: number = 400
+    status: number = 400,
   ): void {
     this.res.status(status).send(error);
   }
   sendObject(object: any): void {
     this.res.status(200).send(object);
+  }
+
+  writeStream(): Response {
+    return this.res;
   }
 }

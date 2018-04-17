@@ -1,6 +1,6 @@
 {
   "name": "outcome-suggestion-service",
-  "version": "1.0.0-beta.2.3",
+  "version": "1.0.0-beta.2.4",
   "description": "Microservice that suggests user outcomes and standard outcomes",
   "scripts": {
     "start": "npm run gulp-tsc",
@@ -31,6 +31,7 @@
     "mongodb": "^2.2.31",
     "morgan": "^1.9.0",
     "node-env-file": "^0.1.8",
+    "pdffiller-stream": "^0.2.0",
     "source-map-support": "^0.5.0",
     "spellchecker": "^3.4.4",
     "stemmer": "^1.0.2",
@@ -60,6 +61,7 @@
     "gulp-typescript": "^3.1.7"
   },
   "prettier": {
-    "singleQuote": true
+    "singleQuote": true,
+    "trailingComma": "all"
   }
 }
