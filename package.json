@@ -1,6 +1,6 @@
 {
   "name": "outcome-suggestion-service",
-  "version": "1.0.0-beta.2.7",
+  "version": "1.0.0-beta.2.8",
   "description": "Microservice that suggests user outcomes and standard outcomes",
   "scripts": {
     "start": "npm run gulp-tsc",
