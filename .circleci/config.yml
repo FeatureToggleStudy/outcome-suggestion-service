@@ -40,6 +40,9 @@ jobs:
           name: Copy package.json
           command: cp ./package.json ./dist
       - run: 
+          name: Copy .ebextensions
+          command: cp -r ./.ebextensions ./dist
+      - run: 
           name: Zip dist
           command: cd ./dist; zip -r ../dist.zip . *; cd ..
       - run:
