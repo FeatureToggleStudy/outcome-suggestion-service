@@ -21,6 +21,7 @@ jobs:
               - ./dist
               - ./package.json
               - ./.elasticbeanstalk
+              - ./.ebextensions
   test:
     <<: *defaults
     steps:
