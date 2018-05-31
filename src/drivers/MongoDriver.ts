@@ -10,16 +10,16 @@ dotenv.config();
 
 export interface Collection {
   name: string;
-  foreigns?: Foriegn[];
+  foreigns?: Foreign[];
   uniques?: string[];
   text?: string[];
 }
-export interface Foriegn {
+export interface Foreign {
   name: string;
-  data: ForiegnData;
+  data: ForeignData;
 }
 
-export interface ForiegnData {
+export interface ForeignData {
   target: string;
   child: boolean;
   registry?: string;
@@ -32,11 +32,11 @@ export class COLLECTIONS {
         name: 'objects',
         data: {
           target: 'LearningObject',
-          child: true
-        }
-      }
+          child: true,
+        },
+      },
     ],
-    uniques: ['username']
+    uniques: ['username'],
   };
   public static LearningObject: Collection = {
     name: 'objects',
@@ -46,18 +46,18 @@ export class COLLECTIONS {
         data: {
           target: 'User',
           child: false,
-          registry: 'objects'
-        }
+          registry: 'objects',
+        },
       },
       {
         name: 'outcomes',
         data: {
           target: 'LearningOutcome',
           child: true,
-          registry: 'source'
-        }
-      }
-    ]
+          registry: 'source',
+        },
+      },
+    ],
   };
   public static LearningOutcome: Collection = {
     name: 'learning-outcomes',
@@ -67,10 +67,10 @@ export class COLLECTIONS {
         data: {
           target: 'LearningObject',
           child: false,
-          registry: 'outcomes'
-        }
-      }
-    ]
+          registry: 'outcomes',
+        },
+      },
+    ],
   };
   public static StandardOutcome: Collection = { name: 'outcomes' };
   public static LearningObjectCollection: Collection = { name: 'collections' };
@@ -83,7 +83,7 @@ COLLECTIONS_MAP.set('LearningOutcome', COLLECTIONS.LearningOutcome);
 COLLECTIONS_MAP.set('StandardOutcome', COLLECTIONS.StandardOutcome);
 COLLECTIONS_MAP.set(
   'LearningObjectCollection',
-  COLLECTIONS.LearningObjectCollection
+  COLLECTIONS.LearningObjectCollection,
 );
 
 export class MongoDriver implements DataStore {
@@ -93,13 +93,13 @@ export class MongoDriver implements DataStore {
       process.env.NODE_ENV === 'production'
         ? process.env.CLARK_DB_URI.replace(
             /<DB_PASSWORD>/g,
-            process.env.CLARK_DB_PWD
+            process.env.CLARK_DB_PWD,
           )
             .replace(/<DB_PORT>/g, process.env.CLARK_DB_PORT)
             .replace(/<DB_NAME>/g, process.env.CLARK_DB_NAME)
         : process.env.CLARK_DB_URI_DEV.replace(
             /<DB_PASSWORD>/g,
-            process.env.CLARK_DB_PWD
+            process.env.CLARK_DB_PWD,
           )
             .replace(/<DB_PORT>/g, process.env.CLARK_DB_PORT)
             .replace(/<DB_NAME>/g, process.env.CLARK_DB_NAME);
@@ -120,7 +120,7 @@ export class MongoDriver implements DataStore {
         this.connect(dbURI, 1);
       } else {
         return Promise.reject(
-          'Problem connecting to database at ' + dbURI + ':\n\t' + e
+          'Problem connecting to database at ' + dbURI + ':\n\t' + e,
         );
       }
     }
@@ -145,7 +145,7 @@ export class MongoDriver implements DataStore {
   public async searchOutcomes(
     filter: OutcomeFilter,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
     try {
       if (page !== undefined && page <= 0) page = 1;
@@ -153,6 +153,7 @@ export class MongoDriver implements DataStore {
       // let query: any = { $text: { $search: filter.text } };
       let query: any = { outcome: { $regex: new RegExp(filter.text, 'ig') } };
       delete filter.text;
+      // tslint:disable-next-line:forin
       for (let prop in filter) {
         query[prop] = { $regex: new RegExp(filter[prop], 'ig') };
       }
@@ -165,7 +166,9 @@ export class MongoDriver implements DataStore {
       docs =
         skip !== undefined
           ? docs.skip(skip).limit(limit)
-          : limit ? docs.limit(limit) : docs;
+          : limit
+            ? docs.limit(limit)
+            : docs;
 
       let outcomes = await docs.toArray();
       outcomes = outcomes.map(outcome => {
@@ -194,7 +197,7 @@ export class MongoDriver implements DataStore {
     mode: suggestMode,
     threshold: number,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
     try {
       if (page !== undefined && page <= 0) page = 1;
@@ -213,6 +216,7 @@ export class MongoDriver implements DataStore {
           query.source = { $regex: new RegExp(filter.source, 'ig') };
         delete filter.source;
 
+        // tslint:disable-next-line:forin
         for (let prop in filter) {
           query[prop] = filter[prop];
         }
@@ -231,10 +235,10 @@ export class MongoDriver implements DataStore {
                 outcome: 1,
                 source: 1,
                 tag: 1,
-                score: { $meta: 'textScore' }
-              }
+                score: { $meta: 'textScore' },
+              },
             },
-            { $match: { score: { $gt: threshold } } }
+            { $match: { score: { $gt: threshold } } },
           ])
           .sort({ score: { $meta: 'textScore' } });
 
@@ -244,12 +248,14 @@ export class MongoDriver implements DataStore {
         docs =
           skip !== undefined
             ? docs.skip(skip).limit(limit)
-            : limit ? docs.limit(limit) : docs;
+            : limit
+              ? docs.limit(limit)
+              : docs;
 
         let outcomes = await docs.toArray();
         return { total: total, outcomes: outcomes };
       } else {
-        //TODO: Match via regex if requirement is different from basic searching....
+        // TODO: Match via regex if requirement is different from basic searching....
       }
     } catch (e) {
       return Promise.reject(e);

@@ -26,9 +26,6 @@ gulp.task('start', ['watch', 'assets'], function() {
   nodemon({
     script: 'dist/app.js',
     ext: 'js html',
-    env: {
-      NODE_ENV: 'development',
-    },
     watch: ['./dist'],
   });
 });
