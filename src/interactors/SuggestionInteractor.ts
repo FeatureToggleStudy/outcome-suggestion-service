@@ -1,6 +1,6 @@
 import { DataStore, Responder } from '../interfaces/interfaces';
 import { suggestMode, OutcomeFilter } from '../interfaces/DataStore';
-import * as spellcheck from 'spellchecker';
+//import * as spellcheck from 'spellchecker';
 import * as stopword from 'stopword';
 import * as stemmer from 'stemmer';
 
@@ -72,6 +72,19 @@ export class SuggestionInteractor {
       responder.sendOperationError(`Problem searching outcomes. Error: ${e}.`);
     }
   }
+
+  public static async findSources(
+    dataStore: DataStore,
+    responder: Responder 
+  ): Promise<void> {
+    try {
+      let sources = await dataStore.findSources();
+      responder.sendObject(sources);
+    } catch (e) {
+      responder.sendOperationError(`Problem finding sources. Error: ${e}.`);
+    }
+  }
+
   /**
    * Removes undefined propeties in Outcome Filter
    *
@@ -102,14 +115,16 @@ export class SuggestionInteractor {
    * @returns {string}
    * @memberof SuggestionInteractor
    */
-  private static correctSpellings(text: string): string {
+  private static correctSpellings(text: string): String {
     let fixedTxt = text;
-    let corrections = spellcheck.checkSpelling(text);
+    //let corrections = spellcheck.checkSpelling(text);
+    let corrections = text;
     for (let pos of corrections) {
       let old = text.substring(pos.start, pos.end);
       let possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);
       let fixed = this.getHighestWeightedCorrection(possibleCorrections);
       fixedTxt = fixedTxt.replace(old, fixed);
+      fixedTxt = text;
     }
     return fixedTxt;
   }

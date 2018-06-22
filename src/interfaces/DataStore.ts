@@ -15,6 +15,8 @@ export interface DataStore {
     limit?: number,
     page?: number
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>;
+  findSources(
+  ): Promise<{ total: number; sources: String[] }>;
 }
 
 export type OutcomeFilter = {

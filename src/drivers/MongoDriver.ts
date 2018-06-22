@@ -38,6 +38,7 @@ export class COLLECTIONS {
     ],
     uniques: ['username'],
   };
+
   public static LearningObject: Collection = {
     name: 'objects',
     foreigns: [
@@ -59,6 +60,7 @@ export class COLLECTIONS {
       },
     ],
   };
+
   public static LearningOutcome: Collection = {
     name: 'learning-outcomes',
     foreigns: [
@@ -72,6 +74,21 @@ export class COLLECTIONS {
       },
     ],
   };
+
+  public static Source: Collection = {
+    name: 'sources',
+    foreigns: [
+      {
+        name: 'objects',
+        data: {
+          target: 'LearningObject',
+          child: true,
+        },
+      },
+    ],
+    uniques: ['source'],
+  };
+  
   public static StandardOutcome: Collection = { name: 'outcomes' };
   public static LearningObjectCollection: Collection = { name: 'collections' };
 }
@@ -81,10 +98,8 @@ COLLECTIONS_MAP.set('User', COLLECTIONS.User);
 COLLECTIONS_MAP.set('LearningObject', COLLECTIONS.LearningObject);
 COLLECTIONS_MAP.set('LearningOutcome', COLLECTIONS.LearningOutcome);
 COLLECTIONS_MAP.set('StandardOutcome', COLLECTIONS.StandardOutcome);
-COLLECTIONS_MAP.set(
-  'LearningObjectCollection',
-  COLLECTIONS.LearningObjectCollection,
-);
+COLLECTIONS_MAP.set('Source', COLLECTIONS.Source);
+COLLECTIONS_MAP.set('LearningObjectCollection', COLLECTIONS.LearningObjectCollection);
 
 export class MongoDriver implements DataStore {
   private db: Db;
@@ -257,6 +272,41 @@ export class MongoDriver implements DataStore {
       } else {
         // TODO: Match via regex if requirement is different from basic searching....
       }
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  public async findSources(
+    limit?: number,
+    page?: number,
+  ): Promise<{ total: number; sources: String[] }> {
+    try {
+      if (page !== undefined && page <= 0) page = 1;
+      let skip = page && limit ? (page - 1) * limit : undefined;
+      // let query: any = { $text: { $search: filter.text } };
+      let query: any = { };
+      // tslint:disable-next-line:forin
+      let docs = await this.db
+        .collection(COLLECTIONS.Source.name)
+        .find(query);
+
+      let total = await docs.count();
+
+      docs =
+        skip !== undefined
+          ? docs.skip(skip).limit(limit)
+          : limit
+            ? docs.limit(limit)
+            : docs;
+
+      let sources = await docs.toArray();
+      sources = sources.map(source => {
+        source.id = source._id;
+        delete source._id;
+        return source;
+      });
+      return { total: total, sources: sources };
     } catch (e) {
       return Promise.reject(e);
     }

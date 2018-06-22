@@ -31,6 +31,7 @@ export class ExpressRouteDriver {
         message: `Welcome to the Learning Outcome Suggestion' API v${version}`,
       });
     });
+
     router.get('/outcomes', async (req, res) => {
       try {
         let filter: OutcomeFilter = {
@@ -52,6 +53,7 @@ export class ExpressRouteDriver {
         console.log(e);
       }
     });
+
     router.get('/outcomes/suggest', async (req, res) => {
       try {
         const mode: suggestMode = 'text';
@@ -79,6 +81,7 @@ export class ExpressRouteDriver {
         console.log(e);
       }
     });
+
     // FIXME: Remove from Outcome Suggestion if feature is removed or expanded
     router.get('/users/:username/cards', async (req, res) => {
       try {
@@ -93,6 +96,19 @@ export class ExpressRouteDriver {
 
         businesscards.fillPdf(responder, first_name, last_name, user_name, org);
       } catch (e) {
+        console.log(e);
+      }
+    });
+
+    //Kolbe's Route
+    router.get('/sources', async (req, res) => {
+      try {
+        await SuggestionInteractor.findSources(
+          this.dataStore,
+          this.getResponder(res)
+        );
+      } catch (e) {
+        //print the error
         console.log(e);
       }
     });
