@@ -1,6 +1,6 @@
 import { DataStore, Responder } from '../interfaces/interfaces';
 import { suggestMode, OutcomeFilter } from '../interfaces/DataStore';
-//import * as spellcheck from 'spellchecker';
+import * as spellcheck from 'spellchecker';
 import * as stopword from 'stopword';
 import * as stemmer from 'stemmer';
 
@@ -26,19 +26,18 @@ export class SuggestionInteractor {
     mode: suggestMode = 'text',
     threshold: number = 0,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<void> {
     try {
       filter = this.sanitizeFilter(filter);
       filter.text = this.removeStopwords(filter.text);
       filter.text = this.stemWords(filter.text);
-      console.log('FILTER: ', filter);
       let suggestions = await dataStore.suggestOutcomes(
         filter,
         mode,
         threshold,
         limit,
-        page
+        page,
       );
       responder.sendObject(suggestions);
     } catch (e) {
@@ -62,7 +61,7 @@ export class SuggestionInteractor {
     responder: Responder,
     filter: OutcomeFilter,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<void> {
     try {
       filter = this.sanitizeFilter(filter);
@@ -73,20 +72,24 @@ export class SuggestionInteractor {
     }
   }
 
-  public static async findSources(
-    dataStore: DataStore,
-    responder: Responder 
-  ): Promise<void> {
+  /**
+   * Fetches all Standard Outcome sources
+   *
+   * @static
+   * @param {DataStore} dataStore
+   * @returns {Promise<string[]>}
+   * @memberof SuggestionInteractor
+   */
+  public static async fetchSources(dataStore: DataStore): Promise<string[]> {
     try {
-      let sources = await dataStore.findSources();
-      responder.sendObject(sources);
+      return dataStore.fetchSources();
     } catch (e) {
-      responder.sendOperationError(`Problem finding sources. Error: ${e}.`);
+      return Promise.reject(`Problem finding sources. Error: ${e}.`);
     }
   }
 
   /**
-   * Removes undefined propeties in Outcome Filter
+   * Removes undefined properties in Outcome Filter
    *
    * @private
    * @static
@@ -115,10 +118,9 @@ export class SuggestionInteractor {
    * @returns {string}
    * @memberof SuggestionInteractor
    */
-  private static correctSpellings(text: string): String {
+  private static correctSpellings(text: string): string {
     let fixedTxt = text;
-    //let corrections = spellcheck.checkSpelling(text);
-    let corrections = text;
+    const corrections = spellcheck.checkSpelling(text);
     for (let pos of corrections) {
       let old = text.substring(pos.start, pos.end);
       let possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);

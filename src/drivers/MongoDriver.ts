@@ -75,20 +75,6 @@ export class COLLECTIONS {
     ],
   };
 
-  public static Source: Collection = {
-    name: 'sources',
-    foreigns: [
-      {
-        name: 'objects',
-        data: {
-          target: 'LearningObject',
-          child: true,
-        },
-      },
-    ],
-    uniques: ['source'],
-  };
-  
   public static StandardOutcome: Collection = { name: 'outcomes' };
   public static LearningObjectCollection: Collection = { name: 'collections' };
 }
@@ -98,13 +84,15 @@ COLLECTIONS_MAP.set('User', COLLECTIONS.User);
 COLLECTIONS_MAP.set('LearningObject', COLLECTIONS.LearningObject);
 COLLECTIONS_MAP.set('LearningOutcome', COLLECTIONS.LearningOutcome);
 COLLECTIONS_MAP.set('StandardOutcome', COLLECTIONS.StandardOutcome);
-COLLECTIONS_MAP.set('Source', COLLECTIONS.Source);
-COLLECTIONS_MAP.set('LearningObjectCollection', COLLECTIONS.LearningObjectCollection);
+COLLECTIONS_MAP.set(
+  'LearningObjectCollection',
+  COLLECTIONS.LearningObjectCollection,
+);
 
 export class MongoDriver implements DataStore {
   private db: Db;
   constructor() {
-    let dburi =
+    const dburi =
       process.env.NODE_ENV === 'production'
         ? process.env.CLARK_DB_URI.replace(
             /<DB_PASSWORD>/g,
@@ -132,7 +120,10 @@ export class MongoDriver implements DataStore {
       this.db = await MongoClient.connect(dbURI);
     } catch (e) {
       if (!retryAttempt) {
-        this.connect(dbURI, 1);
+        this.connect(
+          dbURI,
+          1,
+        );
       } else {
         return Promise.reject(
           'Problem connecting to database at ' + dbURI + ':\n\t' + e,
@@ -164,19 +155,19 @@ export class MongoDriver implements DataStore {
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
     try {
       if (page !== undefined && page <= 0) page = 1;
-      let skip = page && limit ? (page - 1) * limit : undefined;
-      // let query: any = { $text: { $search: filter.text } };
-      let query: any = { outcome: { $regex: new RegExp(filter.text, 'ig') } };
+      const skip = page && limit ? (page - 1) * limit : undefined;
+      // const query: any = { $text: { $search: filter.text } };
+      const query: any = { outcome: { $regex: new RegExp(filter.text, 'ig') } };
       delete filter.text;
       // tslint:disable-next-line:forin
-      for (let prop in filter) {
+      for (const prop in filter) {
         query[prop] = { $regex: new RegExp(filter[prop], 'ig') };
       }
       let docs = await this.db
         .collection(COLLECTIONS.StandardOutcome.name)
         .find(query);
 
-      let total = await docs.count();
+      const total = await docs.count();
 
       docs =
         skip !== undefined
@@ -216,13 +207,13 @@ export class MongoDriver implements DataStore {
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
     try {
       if (page !== undefined && page <= 0) page = 1;
-      let skip = page && limit ? (page - 1) * limit : undefined;
+      const skip = page && limit ? (page - 1) * limit : undefined;
 
       if (mode === 'text') {
-        let text = filter.text;
+        const text = filter.text;
         delete filter.text;
 
-        let query: any = { $text: { $search: text } };
+        const query: any = { $text: { $search: text } };
 
         if (filter.name) query.name = { $regex: new RegExp(filter.name, 'ig') };
         delete filter.name;
@@ -232,11 +223,11 @@ export class MongoDriver implements DataStore {
         delete filter.source;
 
         // tslint:disable-next-line:forin
-        for (let prop in filter) {
+        for (const prop in filter) {
           query[prop] = filter[prop];
         }
 
-        let docs = await this.db
+        const docs = await this.db
           .collection(COLLECTIONS.StandardOutcome.name)
           .aggregate([
             { $match: query },
@@ -257,8 +248,8 @@ export class MongoDriver implements DataStore {
           ])
           .sort({ score: { $meta: 'textScore' } });
 
-        let arr = await docs.toArray();
-        let total = arr.length;
+        const arr = await docs.toArray();
+        const total = arr.length;
 
         docs =
           skip !== undefined
@@ -267,7 +258,7 @@ export class MongoDriver implements DataStore {
               ? docs.limit(limit)
               : docs;
 
-        let outcomes = await docs.toArray();
+        const outcomes = await docs.toArray();
         return { total: total, outcomes: outcomes };
       } else {
         // TODO: Match via regex if requirement is different from basic searching....
@@ -277,36 +268,17 @@ export class MongoDriver implements DataStore {
     }
   }
 
-  public async findSources(
-    limit?: number,
-    page?: number,
-  ): Promise<{ total: number; sources: String[] }> {
+  /**
+   * Fetches array of distinct sources
+   *
+   * @returns {Promise<string[]>}
+   * @memberof MongoDriver
+   */
+  public async fetchSources(): Promise<string[]> {
     try {
-      if (page !== undefined && page <= 0) page = 1;
-      let skip = page && limit ? (page - 1) * limit : undefined;
-      // let query: any = { $text: { $search: filter.text } };
-      let query: any = { };
-      // tslint:disable-next-line:forin
-      let docs = await this.db
-        .collection(COLLECTIONS.Source.name)
-        .find(query);
-
-      let total = await docs.count();
-
-      docs =
-        skip !== undefined
-          ? docs.skip(skip).limit(limit)
-          : limit
-            ? docs.limit(limit)
-            : docs;
-
-      let sources = await docs.toArray();
-      sources = sources.map(source => {
-        source.id = source._id;
-        delete source._id;
-        return source;
-      });
-      return { total: total, sources: sources };
+      return (<any>(
+        this.db.collection(COLLECTIONS.StandardOutcome.name)
+      )).distinct('source');
     } catch (e) {
       return Promise.reject(e);
     }

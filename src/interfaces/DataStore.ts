@@ -6,17 +6,16 @@ export interface DataStore {
   searchOutcomes(
     filter: OutcomeFilter,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>;
   suggestOutcomes(
     filter: OutcomeFilter,
     mode: suggestMode,
     threshold: number,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>;
-  findSources(
-  ): Promise<{ total: number; sources: String[] }>;
+  fetchSources(): Promise<string[]>;
 }
 
 export type OutcomeFilter = {

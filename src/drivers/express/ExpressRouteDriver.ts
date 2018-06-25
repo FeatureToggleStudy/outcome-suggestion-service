@@ -2,9 +2,7 @@ import { ExpressResponder } from '../drivers';
 import { DataStore, Responder } from '../../interfaces/interfaces';
 import { Router, Response } from 'express';
 import { SuggestionInteractor } from '../../interactors/interactors';
-import { User, LearningObject } from '@cyber4all/clark-entity';
 import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
-import * as businesscards from '../../business-cards/business-cards';
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 // tslint:disable-next-line:no-require-imports
@@ -82,34 +80,13 @@ export class ExpressRouteDriver {
       }
     });
 
-    // FIXME: Remove from Outcome Suggestion if feature is removed or expanded
-    router.get('/users/:username/cards', async (req, res) => {
+    router.get('/outcomes/sources', async (req, res) => {
+      const responder = this.getResponder(res);
       try {
-        const first_name = req.query.fname;
-        const last_name = req.query.lname;
-        let org = req.query.org;
-        const user_name = req.params.username;
-
-        const responder = this.getResponder(res);
-
-        org = org.replace(/"/g, '');
-
-        businesscards.fillPdf(responder, first_name, last_name, user_name, org);
+        const sources = await SuggestionInteractor.fetchSources(this.dataStore);
+        responder.sendObject(sources);
       } catch (e) {
-        console.log(e);
-      }
-    });
-
-    //Kolbe's Route
-    router.get('/sources', async (req, res) => {
-      try {
-        await SuggestionInteractor.findSources(
-          this.dataStore,
-          this.getResponder(res)
-        );
-      } catch (e) {
-        //print the error
-        console.log(e);
+        responder.sendOperationError(e);
       }
     });
   }
