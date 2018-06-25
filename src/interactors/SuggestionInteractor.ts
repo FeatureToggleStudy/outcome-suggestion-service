@@ -26,19 +26,18 @@ export class SuggestionInteractor {
     mode: suggestMode = 'text',
     threshold: number = 0,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<void> {
     try {
       filter = this.sanitizeFilter(filter);
       filter.text = this.removeStopwords(filter.text);
       filter.text = this.stemWords(filter.text);
-      console.log('FILTER: ', filter);
       let suggestions = await dataStore.suggestOutcomes(
         filter,
         mode,
         threshold,
         limit,
-        page
+        page,
       );
       responder.sendObject(suggestions);
     } catch (e) {
@@ -62,7 +61,7 @@ export class SuggestionInteractor {
     responder: Responder,
     filter: OutcomeFilter,
     limit?: number,
-    page?: number
+    page?: number,
   ): Promise<void> {
     try {
       filter = this.sanitizeFilter(filter);
@@ -72,8 +71,25 @@ export class SuggestionInteractor {
       responder.sendOperationError(`Problem searching outcomes. Error: ${e}.`);
     }
   }
+
   /**
-   * Removes undefined propeties in Outcome Filter
+   * Fetches all Standard Outcome sources
+   *
+   * @static
+   * @param {DataStore} dataStore
+   * @returns {Promise<string[]>}
+   * @memberof SuggestionInteractor
+   */
+  public static async fetchSources(dataStore: DataStore): Promise<string[]> {
+    try {
+      return dataStore.fetchSources();
+    } catch (e) {
+      return Promise.reject(`Problem finding sources. Error: ${e}.`);
+    }
+  }
+
+  /**
+   * Removes undefined properties in Outcome Filter
    *
    * @private
    * @static
@@ -104,7 +120,7 @@ export class SuggestionInteractor {
    */
   private static correctSpellings(text: string): string {
     let fixedTxt = text;
-    let corrections = spellcheck.checkSpelling(text);
+    const corrections = spellcheck.checkSpelling(text);
     for (let pos of corrections) {
       let old = text.substring(pos.start, pos.end);
       let possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);
