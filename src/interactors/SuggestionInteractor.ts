@@ -126,7 +126,6 @@ export class SuggestionInteractor {
       let possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);
       let fixed = this.getHighestWeightedCorrection(possibleCorrections);
       fixedTxt = fixedTxt.replace(old, fixed);
-      fixedTxt = text;
     }
     return fixedTxt;
   }
