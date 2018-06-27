@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 const nodemon = require('gulp-nodemon');
 const ts = require('gulp-typescript');
-var exec = require('child_process').exec;
 const JSON_FILES = ['package.json', 'src/*.json', 'src/**/*.json'];
 
 const BUSINESS_CARD_TEMPLATE = ['src/business-cards/businesscardformempty.pdf'];
@@ -25,7 +24,7 @@ gulp.task('assets', function() {
 gulp.task('start', ['watch', 'assets'], function() {
   nodemon({
     script: 'dist/app.js',
-    ext: 'js html',
+    ext: 'js',
     watch: ['./dist'],
   });
 });

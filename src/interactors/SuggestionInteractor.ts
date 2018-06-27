@@ -32,7 +32,7 @@ export class SuggestionInteractor {
       filter = this.sanitizeFilter(filter);
       filter.text = this.removeStopwords(filter.text);
       filter.text = this.stemWords(filter.text);
-      let suggestions = await dataStore.suggestOutcomes(
+      const suggestions = await dataStore.suggestOutcomes(
         filter,
         mode,
         threshold,
@@ -65,7 +65,7 @@ export class SuggestionInteractor {
   ): Promise<void> {
     try {
       filter = this.sanitizeFilter(filter);
-      let suggestions = await dataStore.searchOutcomes(filter, limit, page);
+      const suggestions = await dataStore.searchOutcomes(filter, limit, page);
       responder.sendObject(suggestions);
     } catch (e) {
       responder.sendOperationError(`Problem searching outcomes. Error: ${e}.`);
@@ -98,8 +98,10 @@ export class SuggestionInteractor {
    * @memberof SuggestionInteractor
    */
   private static sanitizeFilter(filter: OutcomeFilter): OutcomeFilter {
-    for (let prop in filter) {
-      if (!filter[prop]) delete filter[prop];
+    for (const prop in filter) {
+      if (!filter[prop]) {
+        delete filter[prop];
+      }
     }
     if (filter.text) {
       filter.text = filter.text.trim();
@@ -121,9 +123,9 @@ export class SuggestionInteractor {
   private static correctSpellings(text: string): string {
     let fixedTxt = text;
     const corrections = spellcheck.checkSpelling(text);
-    for (let pos of corrections) {
-      let old = text.substring(pos.start, pos.end);
-      let possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);
+    for (const pos of corrections) {
+      const old = text.substring(pos.start, pos.end);
+      const possibleCorrections = spellcheck.getCorrectionsForMisspelling(old);
       let fixed = this.getHighestWeightedCorrection(possibleCorrections);
       fixedTxt = fixedTxt.replace(old, fixed);
     }
@@ -139,9 +141,9 @@ export class SuggestionInteractor {
    * @memberof SuggestionInteractor
    */
   private static getHighestWeightedCorrection(possible: string[]): string {
-    let scores: Map<string, number> = new Map<string, number>();
-    for (let word of possible) {
-      let stem = this.stemWords(word);
+    const scores: Map<string, number> = new Map<string, number>();
+    for (const word of possible) {
+      const stem = this.stemWords(word);
       if (scores.has(stem)) {
         let oldScore = scores.get(stem);
         scores.set(stem, ++oldScore);
@@ -149,7 +151,7 @@ export class SuggestionInteractor {
         scores.set(stem, 1);
       }
     }
-    let correction = { word: '', score: 0 };
+    const correction = { word: '', score: 0 };
     scores.forEach((score, word) => {
       if (score > correction.score) {
         correction.score = score;
@@ -186,7 +188,7 @@ export class SuggestionInteractor {
    * @memberof SuggestionInteractor
    */
   private static removeStopwords(text: string): string {
-    let oldString = text.split(' ');
+    const oldString = text.split(' ');
     text = stopword
       .removeStopwords(oldString)
       .join(' ')

@@ -1,7 +1,4 @@
-import { MongoClient, Db, Cursor, ObjectID } from 'mongodb';
-
-export { ObjectID as DBID };
-
+import { MongoClient, Db } from 'mongodb';
 import { DataStore } from '../interfaces/interfaces';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
 import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
@@ -154,13 +151,18 @@ export class MongoDriver implements DataStore {
     page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
     try {
-      if (page !== undefined && page <= 0) page = 1;
+      if (page !== undefined && page <= 0) {
+        page = 1;
+      }
       const skip = page && limit ? (page - 1) * limit : undefined;
-      // const query: any = { $text: { $search: filter.text } };
-      const query: any = { outcome: { $regex: new RegExp(filter.text, 'ig') } };
+      const query: any = {
+        $or: [
+          { $text: { $search: filter.text } },
+          { outcome: { $regex: new RegExp(filter.text, 'ig') } },
+        ],
+      };
       delete filter.text;
-      // tslint:disable-next-line:forin
-      for (const prop in filter) {
+      for (const prop of Object.keys(filter)) {
         query[prop] = { $regex: new RegExp(filter[prop], 'ig') };
       }
       let docs = await this.db
@@ -206,63 +208,63 @@ export class MongoDriver implements DataStore {
     page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
     try {
-      if (page !== undefined && page <= 0) page = 1;
+      if (page !== undefined && page <= 0) {
+        page = 1;
+      }
       const skip = page && limit ? (page - 1) * limit : undefined;
 
-      if (mode === 'text') {
-        const text = filter.text;
-        delete filter.text;
+      const text = filter.text;
+      delete filter.text;
 
-        const query: any = { $text: { $search: text } };
+      const query: any = { $text: { $search: text } };
 
-        if (filter.name) query.name = { $regex: new RegExp(filter.name, 'ig') };
+      if (filter.name) {
+        query.name = { $regex: new RegExp(filter.name, 'ig') };
+
         delete filter.name;
-
-        if (filter.source)
-          query.source = { $regex: new RegExp(filter.source, 'ig') };
-        delete filter.source;
-
-        // tslint:disable-next-line:forin
-        for (const prop in filter) {
-          query[prop] = filter[prop];
-        }
-
-        const docs = await this.db
-          .collection(COLLECTIONS.StandardOutcome.name)
-          .aggregate([
-            { $match: query },
-            {
-              $project: {
-                _id: 0,
-                id: '$_id',
-                author: 1,
-                name: 1,
-                date: 1,
-                outcome: 1,
-                source: 1,
-                tag: 1,
-                score: { $meta: 'textScore' },
-              },
-            },
-            { $match: { score: { $gt: threshold } } },
-          ])
-          .sort({ score: { $meta: 'textScore' } });
-
-        const arr = await docs.toArray();
-        const total = arr.length;
-
-        docs =
-          skip !== undefined
-            ? docs.skip(skip).limit(limit)
-            : limit
-              ? docs.limit(limit)
-              : docs;
-
-        const outcomes = await docs.toArray();
-        return { total: total, outcomes: outcomes };
-      } else {
-        // TODO: Match via regex if requirement is different from basic searching....
       }
+      if (filter.source) {
+        query.source = { $regex: new RegExp(filter.source, 'ig') };
+        delete filter.source;
+      }
+
+      for (const prop of Object.keys(filter)) {
+        query[prop] = filter[prop];
+      }
+
+      let docs = await this.db
+        .collection(COLLECTIONS.StandardOutcome.name)
+        .aggregate([
+          { $match: query },
+          {
+            $project: {
+              _id: 0,
+              id: '$_id',
+              author: 1,
+              name: 1,
+              date: 1,
+              outcome: 1,
+              source: 1,
+              tag: 1,
+              score: { $meta: 'textScore' },
+            },
+          },
+          { $match: { score: { $gt: threshold } } },
+        ])
+        .sort({ score: { $meta: 'textScore' } });
+
+      const arr = await docs.toArray();
+      const total = arr.length;
+
+      docs =
+        skip !== undefined
+          ? docs.skip(skip).limit(limit)
+          : limit
+            ? docs.limit(limit)
+            : docs;
+
+      const outcomes = await docs.toArray();
+      return { total, outcomes };
     } catch (e) {
       return Promise.reject(e);
     }

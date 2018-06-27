@@ -4,6 +4,6 @@ import { DataStore } from './interfaces/interfaces';
 // ----------------------------------------------------------------------------------
 // Initializations
 // ----------------------------------------------------------------------------------
-let dataStore: DataStore = new MongoDriver();
+const dataStore: DataStore = new MongoDriver();
 // ----------------------------------------------------------------------------------
 ExpressDriver.start(dataStore);
