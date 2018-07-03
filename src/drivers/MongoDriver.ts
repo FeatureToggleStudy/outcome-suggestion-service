@@ -158,7 +158,7 @@ export class MongoDriver implements DataStore {
       const query: any = {
         $or: [
           { $text: { $search: filter.text } },
-          { outcome: { $regex: new RegExp(filter.text, 'ig') } },
+          { outcome: new RegExp(filter.text, 'ig') },
         ],
       };
       delete filter.text;
