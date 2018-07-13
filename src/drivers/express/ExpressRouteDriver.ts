@@ -6,7 +6,7 @@ import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 // tslint:disable-next-line:no-require-imports
-const version = require('../../package.json').version;
+const version = require('../../../package.json').version;
 
 export class ExpressRouteDriver {
   constructor(private dataStore: DataStore) {}
