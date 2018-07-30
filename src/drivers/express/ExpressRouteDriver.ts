@@ -5,8 +5,6 @@ import { SuggestionInteractor } from '../../interactors/interactors';
 import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
-// tslint:disable-next-line:no-require-imports
-const version = require('../../../package.json').version;
 
 export class ExpressRouteDriver {
   constructor(private dataStore: DataStore) {}
@@ -24,13 +22,6 @@ export class ExpressRouteDriver {
 
   private setRoutes(router: Router): void {
     router.get('/', async (req, res) => {
-      res.json({
-        version,
-        message: `Welcome to the Learning Outcome Suggestion' API v${version}`,
-      });
-    });
-
-    router.get('/outcomes', async (req, res) => {
       try {
         let filter: OutcomeFilter = {
           text: req.query.text ? req.query.text : '',
@@ -52,7 +43,7 @@ export class ExpressRouteDriver {
       }
     });
 
-    router.get('/outcomes/suggest', async (req, res) => {
+    router.get('/suggest', async (req, res) => {
       try {
         const mode: suggestMode = 'text';
         const scoreThreshold: number = process.env.SUGGESTION_THRESHOLD
@@ -80,7 +71,7 @@ export class ExpressRouteDriver {
       }
     });
 
-    router.get('/outcomes/sources', async (req, res) => {
+    router.get('/sources', async (req, res) => {
       const responder = this.getResponder(res);
       try {
         const sources = await SuggestionInteractor.fetchSources(this.dataStore);

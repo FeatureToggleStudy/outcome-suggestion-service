@@ -5,6 +5,9 @@ import { ExpressRouteDriver } from '../drivers';
 import * as http from 'http';
 import * as logger from 'morgan';
 
+// tslint:disable-next-line:no-require-imports
+const version = require('../../package.json').version;
+
 export class ExpressDriver {
   static app = express();
   static start(dataStore: DataStore) {
@@ -40,8 +43,20 @@ export class ExpressDriver {
       next();
     });
 
+    const API_BASE_ROUTE = 'outcomes';
+
+    this.app.get('/', async (_: express.Request, res: express.Response) => {
+      res.json({
+        version,
+        message: `Welcome to the Learning Outcome Suggestion' API v${version}`,
+      });
+    });
+
     // Set our api routes
-    this.app.use('/', ExpressRouteDriver.buildRouter(dataStore));
+    this.app.use(
+      `${API_BASE_ROUTE}`,
+      ExpressRouteDriver.buildRouter(dataStore),
+    );
 
     /**
      * Get port from environment and store in Express.
