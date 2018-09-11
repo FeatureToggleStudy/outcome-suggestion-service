@@ -1,0 +1,39 @@
+openapi: 3.0.1
+info: 
+  title: Outcome-Suggestion-Service 
+  description: This service is responsible for when the user is on CLARK and wants to look for a specific Learning outcome or browse from the ones stored within the site. This has various features such as filtering.
+  version: 1.0.0
+tags: 
+  - name: "outcomes"
+    description: Contains the routes used when the user is searching for a specific learning outcome or uses the filter feature to search through as well
+paths:
+  /outcomes:
+    get:
+      tags: 
+        - outcomes
+      description: Uses the filter function for if the user decides to filter through the learning outcomes.
+      responses:
+        200:
+          description: "Sucessful Operation"
+        400: 
+          description: "Server error encounter."
+  /outcomes/suggest:
+    get:
+      tags: 
+        - outcomes
+      description: route gets the suggested learning outcomes based on the users search query within the search bar 
+      responses:
+        200:  
+          description: "Successful Operation"
+        400:
+          description: "Server error encounter."
+  /outcomes/sources:
+    get:
+      tags: 
+        - outcomes
+      description: Route gets the associated resources for the learning outcome that is suggested or the user picks, 
+      responses:
+        200: 
+          description: "Success!"
+        400:  
+          description: "Server error encounter."
