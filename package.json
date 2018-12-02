@@ -58,7 +58,7 @@
     "typescript": "^2.5.3",
     "gulp": "^3.9.1",
     "gulp-nodemon": "^2.2.1",
-    "gulp-typescript": "^4.0.2"
+    "gulp-typescript": "^5.0.0"
   },
   "prettier": {
     "singleQuote": true,
