@@ -56,7 +56,7 @@
     "tape": "^4.8.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-nodemon": "^2.2.1",
     "gulp-typescript": "^4.0.2"
   },
