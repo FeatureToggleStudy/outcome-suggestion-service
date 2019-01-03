@@ -25,34 +25,34 @@ paths:
             description: the organization or document this outcome is drawn from
           - in: query
             name: name
-            schema: 
-              type: string 
-            description: the label or unit of the outcome 
+            schema:
+              type: string
+            description: the label or unit of the outcome
           - in: query
             name: outcome
             schema:
-              type: string 
-            description: the text of the outcome 
+              type: string
+            description: the text of the outcome
           - in: query
             name: date
             schema:
-              type: string 
-            description: the year this standard was established 
+              type: string
+            description: the year this standard was established
       summary: responds with array of standard outcomes from the text
       responses:
         '200':
-          description: Successful Operation 
-          content:  
-            application/json: 
-              schema: 
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
                 type: array
                 items:
                   type: string
                   properties: 
-                    author: 
+                    author:
                       type: string
                     name:
-                      type: string 
+                      type: string
                     outcome:
                       type: string
                       
@@ -65,60 +65,60 @@ paths:
       description: >-
         route gets the suggested learning outcomes based on the users search
         query within the search bar
-      parameters: 
+      parameters:
           - in: query
             name: text
-            schema: 
+            schema:
               type: string
             description: obtains the outcome text from the user
             required: true
-          - in: query 
+          - in: query
             name: author
             schema: 
-              type: string 
+              type: string
             description: the organization or document this outcome is drawn from
           - in: query
             name: date
             schema:
-              type: string 
+              type: string
             description: the year this standard was established
           - in: query
             name: name
-            schema: 
-              type: string 
-            description: the label or unit of the outcome 
+            schema:
+              type: string
+            description: the label or unit of the outcome
           - in: query
             name: page
-            schema: 
-              type: integer 
+            schema:
+              type: integer
             description: displays the page number the user is currently on
           - in: query
             name: limit
-            schema: 
-              type: integer 
+            schema:
+              type: integer
             description: sets the max limit of pages to be displayed
       summary: outputs the outcome mappings in the builder
       responses:
         '200':
           description: "Successful Operation"
-          content: 
-            application/json: 
-              schema: 
+          content:
+            application/json:
+              schema:
                 type: array
                 items:
                   type: string
                   properties:
-                    text: 
+                    text:
                       type: string
-                    author: 
+                    author:
                       type: string
                     date:
-                      type: string 
+                      type: string
                     outcome:
                       type: string
-                    name: 
+                    name:
                       type: string
-                    page: 
+                    page:
                       type: integer
                     limit:
                       type: integer
@@ -129,7 +129,7 @@ paths:
       tags:
         - outcomes
       summary: Route feteches the sources related the text the user entered with 
-        the outcome toggle enabled. 
+        the outcome toggle enabled.
       responses:
         '200':
           description: Success!
