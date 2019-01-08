@@ -3,6 +3,7 @@ import { DataStore, Responder } from '../../interfaces/interfaces';
 import { Router, Response } from 'express';
 import { SuggestionInteractor } from '../../interactors/interactors';
 import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
+import { StandardOutcome } from '@cyber4all/clark-entity';
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 // tslint:disable-next-line:no-require-imports
@@ -40,15 +41,21 @@ export class ExpressRouteDriver {
         };
         let page = req.query.page ? +req.query.page : undefined;
         let limit = req.query.limit ? +req.query.limit : undefined;
-        await SuggestionInteractor.searchOutcomes(
-          this.dataStore,
-          this.getResponder(res),
+        const outcomePayload = await SuggestionInteractor.searchOutcomes({
+          dataStore: this.dataStore,
           filter,
-          page,
           limit,
-        );
+          page,
+        });
+
+        outcomePayload.outcomes = outcomePayload.outcomes.map(outcome => {
+          console.log('OutCOMES: ', outcome, outcome.toPlainObject());
+
+          return outcome.toPlainObject() as StandardOutcome;
+        });
+        res.send(outcomePayload);
       } catch (e) {
-        console.log(e);
+        res.status(500).send(e);
       }
     });
 
@@ -66,17 +73,20 @@ export class ExpressRouteDriver {
         };
         let page = req.query.page ? +req.query.page : undefined;
         let limit = req.query.limit ? +req.query.limit : undefined;
-        await SuggestionInteractor.suggestOutcomes(
+        const outcomePayload = await SuggestionInteractor.suggestOutcomes(
           this.dataStore,
-          this.getResponder(res),
           filter,
           mode,
           scoreThreshold,
           limit,
           page,
         );
+        outcomePayload.outcomes = outcomePayload.outcomes.map(
+          outcome => outcome.toPlainObject() as StandardOutcome,
+        );
+        res.send(outcomePayload);
       } catch (e) {
-        console.log(e);
+        res.status(500).send(e);
       }
     });
 

@@ -3,6 +3,7 @@ import { DataStore } from '../interfaces/interfaces';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
 import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
 import * as dotenv from 'dotenv';
+import { StandardOutcome } from '@cyber4all/clark-entity';
 dotenv.config();
 
 export const COLLECTIONS = {
@@ -51,14 +52,14 @@ export class MongoDriver implements DataStore {
    * @param {OutcomeFilter} filter
    * @param {number} [limit]
    * @param {number} [page]
-   * @returns {Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>}
+   * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
    * @memberof MongoDriver
    */
   public async searchOutcomes(
     filter: OutcomeFilter,
     limit?: number,
     page?: number,
-  ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
     try {
       if (page !== undefined && page <= 0) {
         page = 1;
@@ -76,7 +77,7 @@ export class MongoDriver implements DataStore {
       }
       let docs = await this.client
         .db()
-        .collection(COLLECTIONS.STANDARD_OUTCOMES)
+        .collection<StandardOutcomeDocument>(COLLECTIONS.STANDARD_OUTCOMES)
         .find(query);
 
       const total = await docs.count();
@@ -87,14 +88,13 @@ export class MongoDriver implements DataStore {
           : limit
           ? docs.limit(limit)
           : docs;
-
       let outcomes = await docs.toArray();
-      outcomes = outcomes.map(outcome => {
-        outcome.id = outcome._id;
-        delete outcome._id;
-        return outcome;
-      });
-      return { total: total, outcomes: outcomes };
+      return {
+        total: total,
+        outcomes: outcomes.map(
+          outcome => new StandardOutcome({ ...outcome, id: outcome._id }),
+        ),
+      };
     } catch (e) {
       return Promise.reject(e);
     }
@@ -107,7 +107,7 @@ export class MongoDriver implements DataStore {
    * @param {number} threshold
    * @param {number} [limit]
    * @param {number} [page]
-   * @returns {Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>}
+   * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
    * @memberof MongoDriver
    */
   public async suggestOutcomes(
@@ -116,7 +116,7 @@ export class MongoDriver implements DataStore {
     threshold: number,
     limit?: number,
     page?: number,
-  ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
     try {
       if (page !== undefined && page <= 0) {
         page = 1;
@@ -144,7 +144,7 @@ export class MongoDriver implements DataStore {
 
       let docs = await this.client
         .db()
-        .collection(COLLECTIONS.STANDARD_OUTCOMES)
+        .collection<StandardOutcomeDocument>(COLLECTIONS.STANDARD_OUTCOMES)
         .aggregate([
           { $match: query },
           {
@@ -175,7 +175,12 @@ export class MongoDriver implements DataStore {
           : docs;
 
       const outcomes = await docs.toArray();
-      return { total, outcomes };
+      return {
+        total,
+        outcomes: outcomes.map(
+          outcome => new StandardOutcome({ ...outcome, id: outcome._id }),
+        ),
+      };
     } catch (e) {
       return Promise.reject(e);
     }
