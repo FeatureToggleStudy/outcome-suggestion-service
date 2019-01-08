@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export const COLLECTIONS = {
-  STANDARD_OUTCOMES: 'standard-outcomes',
+  STANDARD_OUTCOMES: 'outcomes',
 };
 
 export class MongoDriver implements DataStore {
