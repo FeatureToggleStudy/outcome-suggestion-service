@@ -5,89 +5,12 @@ import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-export interface Collection {
-  name: string;
-  foreigns?: Foreign[];
-  uniques?: string[];
-  text?: string[];
-}
-export interface Foreign {
-  name: string;
-  data: ForeignData;
-}
-
-export interface ForeignData {
-  target: string;
-  child: boolean;
-  registry?: string;
-}
-export class COLLECTIONS {
-  public static User: Collection = {
-    name: 'users',
-    foreigns: [
-      {
-        name: 'objects',
-        data: {
-          target: 'LearningObject',
-          child: true,
-        },
-      },
-    ],
-    uniques: ['username'],
-  };
-
-  public static LearningObject: Collection = {
-    name: 'objects',
-    foreigns: [
-      {
-        name: 'authorID',
-        data: {
-          target: 'User',
-          child: false,
-          registry: 'objects',
-        },
-      },
-      {
-        name: 'outcomes',
-        data: {
-          target: 'LearningOutcome',
-          child: true,
-          registry: 'source',
-        },
-      },
-    ],
-  };
-
-  public static LearningOutcome: Collection = {
-    name: 'learning-outcomes',
-    foreigns: [
-      {
-        name: 'source',
-        data: {
-          target: 'LearningObject',
-          child: false,
-          registry: 'outcomes',
-        },
-      },
-    ],
-  };
-
-  public static StandardOutcome: Collection = { name: 'outcomes' };
-  public static LearningObjectCollection: Collection = { name: 'collections' };
-}
-
-const COLLECTIONS_MAP = new Map<string, Collection>();
-COLLECTIONS_MAP.set('User', COLLECTIONS.User);
-COLLECTIONS_MAP.set('LearningObject', COLLECTIONS.LearningObject);
-COLLECTIONS_MAP.set('LearningOutcome', COLLECTIONS.LearningOutcome);
-COLLECTIONS_MAP.set('StandardOutcome', COLLECTIONS.StandardOutcome);
-COLLECTIONS_MAP.set(
-  'LearningObjectCollection',
-  COLLECTIONS.LearningObjectCollection,
-);
+export const COLLECTIONS = {
+  STANDARD_OUTCOMES: 'standard-outcomes',
+};
 
 export class MongoDriver implements DataStore {
-  private db: Db;
+  private client: MongoClient;
   constructor(dburi: string) {
     this.connect(dburi);
   }
@@ -100,7 +23,7 @@ export class MongoDriver implements DataStore {
    */
   async connect(dbURI: string, retryAttempt?: number): Promise<void> {
     try {
-      this.db = await MongoClient.connect(dbURI);
+      this.client = await MongoClient.connect(dbURI);
     } catch (e) {
       if (!retryAttempt) {
         this.connect(
@@ -120,7 +43,7 @@ export class MongoDriver implements DataStore {
    * @memberof MongoDriver
    */
   disconnect(): void {
-    this.db.close();
+    this.client.close();
   }
   /**
    * Performs regex search on Outcomes with provided fields
@@ -151,8 +74,9 @@ export class MongoDriver implements DataStore {
       for (const prop of Object.keys(filter)) {
         query[prop] = { $regex: new RegExp(filter[prop], 'ig') };
       }
-      let docs = await this.db
-        .collection(COLLECTIONS.StandardOutcome.name)
+      let docs = await this.client
+        .db()
+        .collection(COLLECTIONS.STANDARD_OUTCOMES)
         .find(query);
 
       const total = await docs.count();
@@ -161,8 +85,8 @@ export class MongoDriver implements DataStore {
         skip !== undefined
           ? docs.skip(skip).limit(limit)
           : limit
-            ? docs.limit(limit)
-            : docs;
+          ? docs.limit(limit)
+          : docs;
 
       let outcomes = await docs.toArray();
       outcomes = outcomes.map(outcome => {
@@ -218,8 +142,9 @@ export class MongoDriver implements DataStore {
         query[prop] = filter[prop];
       }
 
-      let docs = await this.db
-        .collection(COLLECTIONS.StandardOutcome.name)
+      let docs = await this.client
+        .db()
+        .collection(COLLECTIONS.STANDARD_OUTCOMES)
         .aggregate([
           { $match: query },
           {
@@ -246,8 +171,8 @@ export class MongoDriver implements DataStore {
         skip !== undefined
           ? docs.skip(skip).limit(limit)
           : limit
-            ? docs.limit(limit)
-            : docs;
+          ? docs.limit(limit)
+          : docs;
 
       const outcomes = await docs.toArray();
       return { total, outcomes };
@@ -265,7 +190,7 @@ export class MongoDriver implements DataStore {
   public async fetchSources(): Promise<string[]> {
     try {
       return (<any>(
-        this.db.collection(COLLECTIONS.StandardOutcome.name)
+        this.client.db().collection(COLLECTIONS.STANDARD_OUTCOMES)
       )).distinct('source');
     } catch (e) {
       return Promise.reject(e);
