@@ -128,7 +128,7 @@ paths:
     get:
       tags:
         - outcomes
-      summary: Route feteches the sources related the text the user entered with 
+       summary: Route fetches the sources related the text the user entered with 
         the outcome toggle enabled.
       responses:
         '200':
