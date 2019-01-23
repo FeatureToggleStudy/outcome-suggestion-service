@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Outcome-Suggestion-Service
   description: >-
-    This service is responisble for making a query for when the user wants to search for a specific learning outcome, recommended a learning outcome based on the learning object , or display the outcome sources. 
+     This service is responsible for making a query when the user wants to search for a specific learning outcome, recommend a learning outcome based on the learning object, or display the outcome sources. 
   version: 1.0.0
 tags:
   - name: outcomes
