@@ -91,9 +91,13 @@ export class MongoDriver implements DataStore {
       let outcomes = await docs.toArray();
       return {
         total: total,
-        outcomes: outcomes.map(
-          outcome => new StandardOutcome({ ...outcome, id: outcome._id }),
-        ),
+        outcomes: outcomes.map(outcome => {
+          outcome.date = `${outcome.date}`;
+          return new StandardOutcome({
+            ...outcome,
+            id: outcome._id,
+          });
+        }),
       };
     } catch (e) {
       return Promise.reject(e);
@@ -177,9 +181,13 @@ export class MongoDriver implements DataStore {
       const outcomes = await docs.toArray();
       return {
         total,
-        outcomes: outcomes.map(
-          outcome => new StandardOutcome({ ...outcome, id: outcome._id }),
-        ),
+        outcomes: outcomes.map(outcome => {
+          outcome.date = `${outcome.date}`;
+          return new StandardOutcome({
+            ...outcome,
+            id: outcome._id,
+          });
+        }),
       };
     } catch (e) {
       return Promise.reject(e);
