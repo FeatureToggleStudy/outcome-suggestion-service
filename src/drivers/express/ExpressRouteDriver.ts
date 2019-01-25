@@ -48,11 +48,9 @@ export class ExpressRouteDriver {
           page,
         });
 
-        outcomePayload.outcomes = outcomePayload.outcomes.map(outcome => {
-          console.log('OutCOMES: ', outcome, outcome.toPlainObject());
-
-          return outcome.toPlainObject() as StandardOutcome;
-        });
+        outcomePayload.outcomes = outcomePayload.outcomes.map(
+          outcome => outcome.toPlainObject() as StandardOutcome,
+        );
         res.send(outcomePayload);
       } catch (e) {
         res.status(500).send(e);
