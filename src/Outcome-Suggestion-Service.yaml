@@ -1,0 +1,137 @@
+openapi: 3.0.1
+info:
+  title: Outcome-Suggestion-Service
+  description: >-
+     This service is responsible for making a query when the user wants to search for a specific learning outcome, recommend a learning outcome based on the learning object, or display the outcome sources. 
+  version: 1.0.0
+tags:
+  - name: outcomes
+    description: >-
+      Contains routes for when the user wants to search for a learning object by the associated outcome or when they are in the builder and at the Learning Outcome step where they are recommended outcome mappings based on the verb they use along with their objective. 
+paths:
+  /outcomes:
+    get:
+      tags:
+        - outcomes
+      description: >-
+        Filters the learning object by standard outcomes that are selected by 
+        returning an array of standard outcomes when the user clicks to filter
+        by outcomes
+      parameters: 
+          - in: query
+            name: author
+            schema:
+              type: string
+            description: the organization or document this outcome is drawn from
+          - in: query
+            name: name
+            schema:
+              type: string
+            description: the label or unit of the outcome
+          - in: query
+            name: outcome
+            schema:
+              type: string
+            description: the text of the outcome
+          - in: query
+            name: date
+            schema:
+              type: string
+            description: the year this standard was established
+      summary: responds with array of standard outcomes from the text
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  properties: 
+                    author:
+                      type: string
+                    name:
+                      type: string
+                    outcome:
+                      type: string
+                      
+        '400':
+          description: Server error encounter.
+  /outcomes/suggest:
+    get:
+      tags:
+        - outcomes
+      description: >-
+        route gets the suggested learning outcomes based on the users search
+        query within the search bar
+      parameters:
+          - in: query
+            name: text
+            schema:
+              type: string
+            description: obtains the outcome text from the user
+            required: true
+          - in: query
+            name: author
+            schema: 
+              type: string
+            description: the organization or document this outcome is drawn from
+          - in: query
+            name: date
+            schema:
+              type: string
+            description: the year this standard was established
+          - in: query
+            name: name
+            schema:
+              type: string
+            description: the label or unit of the outcome
+          - in: query
+            name: page
+            schema:
+              type: integer
+            description: displays the page number the user is currently on
+          - in: query
+            name: limit
+            schema:
+              type: integer
+            description: sets the max limit of pages to be displayed
+      summary: outputs the outcome mappings in the builder
+      responses:
+        '200':
+          description: "Successful Operation"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  properties:
+                    text:
+                      type: string
+                    author:
+                      type: string
+                    date:
+                      type: string
+                    outcome:
+                      type: string
+                    name:
+                      type: string
+                    page:
+                      type: integer
+                    limit:
+                      type: integer
+        '400':
+          description: "Server error encounter."
+  /outcomes/sources:
+    get:
+      tags:
+        - outcomes
+       summary: Route fetches the sources related the text the user entered with 
+        the outcome toggle enabled.
+      responses:
+        '200':
+          description: Success!
+        '400':
+          description: Server error encounter.
