@@ -86,7 +86,16 @@ export class ExpressRouteDriver {
         const sources = await SuggestionInteractor.fetchSources(this.dataStore);
         responder.sendObject(sources);
       } catch (e) {
+        console.error(e);
         responder.sendOperationError(e);
+      }
+    });
+    router.get('/outcomes/areas', async (req, res) => {
+      try {
+        const areas = await SuggestionInteractor.fetchAreas(this.dataStore);
+        res.json(areas);
+      } catch (e) {
+        res.send('Internal Server Error');
       }
     });
   }

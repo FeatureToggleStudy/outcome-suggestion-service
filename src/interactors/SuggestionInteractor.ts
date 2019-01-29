@@ -88,6 +88,14 @@ export class SuggestionInteractor {
     }
   }
 
+  public static async fetchAreas(dataStore: DataStore): Promise<{ _id: string, areas: string[]}> {
+    try {
+      return dataStore.fetchAreas();
+    } catch (e) {
+      return Promise.reject(`Problem finding sources. Error: ${e}.`);
+    }
+  }
+
   /**
    * Removes undefined properties in Outcome Filter
    *

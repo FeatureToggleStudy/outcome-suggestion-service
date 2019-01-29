@@ -16,6 +16,7 @@ export interface DataStore {
     page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>;
   fetchSources(): Promise<string[]>;
+  fetchAreas(): Promise<{ _id: string, areas: string[]}>;
 }
 
 export type OutcomeFilter = {
