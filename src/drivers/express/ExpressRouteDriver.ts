@@ -103,7 +103,7 @@ export class ExpressRouteDriver {
         const areas = await SuggestionInteractor.fetchAreas(this.dataStore);
         res.json(areas);
       } catch (e) {
-        res.send('Internal Server Error');
+        res.status(500).send('Internal Server Error');
       }
     });
   }
