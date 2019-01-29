@@ -3,94 +3,18 @@ import { DataStore } from '../interfaces/interfaces';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
 import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
 import * as dotenv from 'dotenv';
+import { StandardOutcome } from '@cyber4all/clark-entity';
 dotenv.config();
 
-export interface Collection {
-  name: string;
-  foreigns?: Foreign[];
-  uniques?: string[];
-  text?: string[];
-}
-export interface Foreign {
-  name: string;
-  data: ForeignData;
-}
-
-export interface ForeignData {
-  target: string;
-  child: boolean;
-  registry?: string;
-}
-export class COLLECTIONS {
-  public static User: Collection = {
-    name: 'users',
-    foreigns: [
-      {
-        name: 'objects',
-        data: {
-          target: 'LearningObject',
-          child: true,
-        },
-      },
-    ],
-    uniques: ['username'],
-  };
-
-  public static LearningObject: Collection = {
-    name: 'objects',
-    foreigns: [
-      {
-        name: 'authorID',
-        data: {
-          target: 'User',
-          child: false,
-          registry: 'objects',
-        },
-      },
-      {
-        name: 'outcomes',
-        data: {
-          target: 'LearningOutcome',
-          child: true,
-          registry: 'source',
-        },
-      },
-    ],
-  };
-
-  public static LearningOutcome: Collection = {
-    name: 'learning-outcomes',
-    foreigns: [
-      {
-        name: 'source',
-        data: {
-          target: 'LearningObject',
-          child: false,
-          registry: 'outcomes',
-        },
-      },
-    ],
-  };
-
-  public static StandardOutcome: Collection = { name: 'outcomes' };
-  public static LearningObjectCollection: Collection = { name: 'collections' };
-}
-
-const COLLECTIONS_MAP = new Map<string, Collection>();
-COLLECTIONS_MAP.set('User', COLLECTIONS.User);
-COLLECTIONS_MAP.set('LearningObject', COLLECTIONS.LearningObject);
-COLLECTIONS_MAP.set('LearningOutcome', COLLECTIONS.LearningOutcome);
-COLLECTIONS_MAP.set('StandardOutcome', COLLECTIONS.StandardOutcome);
-COLLECTIONS_MAP.set(
-  'LearningObjectCollection',
-  COLLECTIONS.LearningObjectCollection,
-);
+export const COLLECTIONS = {
+  STANDARD_OUTCOMES: 'outcomes',
+};
 
 export class MongoDriver implements DataStore {
   private mongoClient: MongoClient;
   private db: Db;
 
-  private constructor() {}
+  private constructor() { }
 
   static async build(dburi: string) {
     const driver = new MongoDriver();
@@ -138,21 +62,21 @@ export class MongoDriver implements DataStore {
   disconnect(): void {
     this.mongoClient.close();
   }
-  
+
   /**
    * Performs regex search on Outcomes with provided fields
    *
    * @param {OutcomeFilter} filter
    * @param {number} [limit]
    * @param {number} [page]
-   * @returns {Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>}
+   * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
    * @memberof MongoDriver
    */
   public async searchOutcomes(
     filter: OutcomeFilter,
     limit?: number,
     page?: number,
-  ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
     try {
       if (page !== undefined && page <= 0) {
         page = 1;
@@ -168,8 +92,9 @@ export class MongoDriver implements DataStore {
       for (const prop of Object.keys(filter)) {
         query[prop] = { $regex: new RegExp(filter[prop], 'ig') };
       }
-      let docs = await this.db
-        .collection(COLLECTIONS.StandardOutcome.name)
+      let docs = await this.mongoClient
+        .db()
+        .collection<StandardOutcomeDocument>(COLLECTIONS.STANDARD_OUTCOMES)
         .find(query);
 
       const total = await docs.count();
@@ -180,14 +105,17 @@ export class MongoDriver implements DataStore {
           : limit
             ? docs.limit(limit)
             : docs;
-
       let outcomes = await docs.toArray();
-      outcomes = outcomes.map(outcome => {
-        outcome.id = outcome._id;
-        delete outcome._id;
-        return outcome;
-      });
-      return { total: total, outcomes: outcomes };
+      return {
+        total: total,
+        outcomes: outcomes.map(outcome => {
+          outcome.date = `${outcome.date}`;
+          return new StandardOutcome({
+            ...outcome,
+            id: outcome._id,
+          });
+        }),
+      };
     } catch (e) {
       return Promise.reject(e);
     }
@@ -200,7 +128,7 @@ export class MongoDriver implements DataStore {
    * @param {number} threshold
    * @param {number} [limit]
    * @param {number} [page]
-   * @returns {Promise<{ total: number; outcomes: StandardOutcomeDocument[] }>}
+   * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
    * @memberof MongoDriver
    */
   public async suggestOutcomes(
@@ -209,7 +137,7 @@ export class MongoDriver implements DataStore {
     threshold: number,
     limit?: number,
     page?: number,
-  ): Promise<{ total: number; outcomes: StandardOutcomeDocument[] }> {
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
     try {
       if (page !== undefined && page <= 0) {
         page = 1;
@@ -235,14 +163,14 @@ export class MongoDriver implements DataStore {
         query[prop] = filter[prop];
       }
 
-      let docs = await this.db
-        .collection(COLLECTIONS.StandardOutcome.name)
+      let docs = await this.mongoClient
+        .db()
+        .collection<StandardOutcomeDocument>(COLLECTIONS.STANDARD_OUTCOMES)
         .aggregate([
           { $match: query },
           {
             $project: {
-              _id: 0,
-              id: '$_id',
+              _id: 1,
               author: 1,
               name: 1,
               date: 1,
@@ -267,7 +195,16 @@ export class MongoDriver implements DataStore {
             : docs;
 
       const outcomes = await docs.toArray();
-      return { total, outcomes };
+      return {
+        total,
+        outcomes: outcomes.map(outcome => {
+          outcome.date = `${outcome.date}`;
+          return new StandardOutcome({
+            ...outcome,
+            id: outcome._id,
+          });
+        }),
+      };
     } catch (e) {
       return Promise.reject(e);
     }
@@ -282,19 +219,19 @@ export class MongoDriver implements DataStore {
   public async fetchSources(): Promise<string[]> {
     try {
       return (<any>(
-        this.db.collection(COLLECTIONS.StandardOutcome.name)
+        this.mongoClient.db().collection(COLLECTIONS.STANDARD_OUTCOMES)
       )).distinct('source');
     } catch (e) {
       return Promise.reject(e);
     }
   }
 
-  public async fetchAreas(): Promise<{ _id: string, areas: string[]}> {
+  public async fetchAreas(): Promise<{ _id: string, areas: string[] }[]> {
     try {
-        return this.db.collection(COLLECTIONS.StandardOutcome.name)
-          .aggregate([
-            { $group: { _id: '$source', areas: { $addToSet: '$name' } }}
-          ]).toArray();
+      return this.db.collection(COLLECTIONS.STANDARD_OUTCOMES)
+        .aggregate([
+          { $group: { _id: '$source', areas: { $addToSet: '$name' } } }
+        ]).toArray();
     } catch (e) {
       return Promise.reject(e);
     }

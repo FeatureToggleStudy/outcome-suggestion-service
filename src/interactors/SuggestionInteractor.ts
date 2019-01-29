@@ -1,8 +1,11 @@
-import { DataStore, Responder } from '../interfaces/interfaces';
+import { DataStore } from '../interfaces/interfaces';
 import { suggestMode, OutcomeFilter } from '../interfaces/DataStore';
+// @ts-ignore spellchecker does not have type definitions
 import * as spellcheck from 'spellchecker';
+// @ts-ignore stopword does not have type definitions
 import * as stopword from 'stopword';
 import * as stemmer from 'stemmer';
+import { StandardOutcome } from '@cyber4all/clark-entity';
 
 export class SuggestionInteractor {
   /**
@@ -10,24 +13,21 @@ export class SuggestionInteractor {
    *
    * @static
    * @param {DataStore} dataStore
-   * @param {Responder} responder
-   * @param {OutcomeFilter} filter
    * @param {suggestMode} [mode='text']
    * @param {number} [threshold=0]
    * @param {number} [limit]
    * @param {number} [page]
-   * @returns {Promise<void>}
+   * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
    * @memberof SuggestionInteractor
    */
   public static async suggestOutcomes(
     dataStore: DataStore,
-    responder: Responder,
     filter: OutcomeFilter,
     mode: suggestMode = 'text',
     threshold: number = 0,
     limit?: number,
     page?: number,
-  ): Promise<void> {
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
     try {
       filter = this.sanitizeFilter(filter);
       filter.text = this.removeStopwords(filter.text);
@@ -39,9 +39,9 @@ export class SuggestionInteractor {
         limit,
         page,
       );
-      responder.sendObject(suggestions);
+      return suggestions;
     } catch (e) {
-      responder.sendOperationError(`Problem suggesting outcomes. Error: ${e}.`);
+      return Promise.reject(`Problem suggesting outcomes. Error: ${e}.`);
     }
   }
   /**
@@ -49,26 +49,28 @@ export class SuggestionInteractor {
    *
    * @static
    * @param {DataStore} dataStore
-   * @param {Responder} responder
    * @param {OutcomeFilter} filter
    * @param {number} [limit]
    * @param {number} [page]
-   * @returns {Promise<void>}
+   * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
    * @memberof SuggestionInteractor
    */
-  public static async searchOutcomes(
-    dataStore: DataStore,
-    responder: Responder,
-    filter: OutcomeFilter,
-    limit?: number,
-    page?: number,
-  ): Promise<void> {
+  public static async searchOutcomes(params: {
+    dataStore: DataStore;
+    filter: OutcomeFilter;
+    limit?: number;
+    page?: number;
+  }): Promise<{ total: number; outcomes: StandardOutcome[] }> {
     try {
-      filter = this.sanitizeFilter(filter);
-      const suggestions = await dataStore.searchOutcomes(filter, limit, page);
-      responder.sendObject(suggestions);
+      params.filter = this.sanitizeFilter(params.filter);
+      const suggestions = await params.dataStore.searchOutcomes(
+        params.filter,
+        params.limit,
+        params.page,
+      );
+      return suggestions;
     } catch (e) {
-      responder.sendOperationError(`Problem searching outcomes. Error: ${e}.`);
+      return Promise.reject(`Problem searching outcomes. Error: ${e}.`);
     }
   }
 
