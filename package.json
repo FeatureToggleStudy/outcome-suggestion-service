@@ -1,6 +1,6 @@
 {
   "name": "outcome-suggestion-service",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Microservice that suggests user outcomes and standard outcomes",
   "scripts": {
     "start": "npm run gulp-tsc",
@@ -28,7 +28,7 @@
     "dotenv": "^6.0.0",
     "express": "^4.16.2",
     "express-jwt": "^5.3.0",
-    "mongodb": "^3.1.10",
+    "mongodb": "^3.1.13",
     "morgan": "^1.9.0",
     "node-env-file": "^0.1.8",
     "pdffiller-stream": "^0.2.0",
@@ -43,7 +43,7 @@
     "@types/express-jwt": "0.0.40",
     "@types/jsonfile": "^4.0.0",
     "@types/line-reader": "0.0.28",
-    "@types/mongodb": "^3.1.18",
+    "@types/mongodb": "^3.1.19",
     "@types/morgan": "^1.7.35",
     "@types/oboe": "^2.0.28",
     "@types/request-promise": "^4.1.39",

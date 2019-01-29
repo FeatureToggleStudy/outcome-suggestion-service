@@ -11,20 +11,35 @@ export const COLLECTIONS = {
 };
 
 export class MongoDriver implements DataStore {
-  private client: MongoClient;
-  constructor(dburi: string) {
-    this.connect(dburi);
+  private mongoClient: MongoClient;
+  private db: Db;
+
+  private constructor() { }
+
+  static async build(dburi: string) {
+    const driver = new MongoDriver();
+    await driver.connect(dburi);
+    return driver;
   }
+
   /**
-   * Connect to MongoDB
+   * Connect to the database. Must be called before any other functions.
+   * @async
    *
-   * @param {*} dburi
-   * @returns {Promise<void>}
-   * @memberof MongoDriver
+   * NOTE: This function will attempt to connect to the database every
+   *       time it is called, but since it assigns the result to a local
+   *       variable which can only ever be created once, only one
+   *       connection will ever be active at a time.
+   *
+   * TODO: Verify that connections are automatically closed
+   *       when they no longer have a reference.
+   *
+   * @param {string} dbIP the host and port on which mongodb is running
    */
   async connect(dbURI: string, retryAttempt?: number): Promise<void> {
     try {
-      this.client = await MongoClient.connect(dbURI);
+      this.mongoClient = await MongoClient.connect(dbURI);
+      this.db = this.mongoClient.db('onion');
     } catch (e) {
       if (!retryAttempt) {
         this.connect(
@@ -38,14 +53,16 @@ export class MongoDriver implements DataStore {
       }
     }
   }
+
   /**
-   * Disconnect from Mongo
-   *
-   * @memberof MongoDriver
+   * Close the database. Note that this will affect all services
+   * and scripts using the database, so only do this if it's very
+   * important or if you are sure that *everything* is finished.
    */
   disconnect(): void {
-    this.client.close();
+    this.mongoClient.close();
   }
+
   /**
    * Performs regex search on Outcomes with provided fields
    *
@@ -75,7 +92,7 @@ export class MongoDriver implements DataStore {
       for (const prop of Object.keys(filter)) {
         query[prop] = { $regex: new RegExp(filter[prop], 'ig') };
       }
-      let docs = await this.client
+      let docs = await this.mongoClient
         .db()
         .collection<StandardOutcomeDocument>(COLLECTIONS.STANDARD_OUTCOMES)
         .find(query);
@@ -86,8 +103,8 @@ export class MongoDriver implements DataStore {
         skip !== undefined
           ? docs.skip(skip).limit(limit)
           : limit
-          ? docs.limit(limit)
-          : docs;
+            ? docs.limit(limit)
+            : docs;
       let outcomes = await docs.toArray();
       return {
         total: total,
@@ -146,7 +163,7 @@ export class MongoDriver implements DataStore {
         query[prop] = filter[prop];
       }
 
-      let docs = await this.client
+      let docs = await this.mongoClient
         .db()
         .collection<StandardOutcomeDocument>(COLLECTIONS.STANDARD_OUTCOMES)
         .aggregate([
@@ -174,8 +191,8 @@ export class MongoDriver implements DataStore {
         skip !== undefined
           ? docs.skip(skip).limit(limit)
           : limit
-          ? docs.limit(limit)
-          : docs;
+            ? docs.limit(limit)
+            : docs;
 
       const outcomes = await docs.toArray();
       return {
@@ -202,8 +219,24 @@ export class MongoDriver implements DataStore {
   public async fetchSources(): Promise<string[]> {
     try {
       return (<any>(
-        this.client.db().collection(COLLECTIONS.STANDARD_OUTCOMES)
+        this.mongoClient.db().collection(COLLECTIONS.STANDARD_OUTCOMES)
       )).distinct('source');
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  /**
+   * Returns all areas of standard outcomes, grouped by source.
+   *
+   * NOTE: "area" is stored as the property "name" in the database.
+   */
+  public async fetchAreas(): Promise<{ _id: string, areas: string[] }[]> {
+    try {
+      return this.db.collection(COLLECTIONS.STANDARD_OUTCOMES)
+        .aggregate([
+          { $group: { _id: '$source', areas: { $addToSet: '$name' } } }
+        ]).toArray();
     } catch (e) {
       return Promise.reject(e);
     }

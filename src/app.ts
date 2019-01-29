@@ -30,6 +30,6 @@ switch (process.env.NODE_ENV) {
   default:
     break;
 }
-const dataStore: DataStore = new MongoDriver(dburi);
-// ----------------------------------------------------------------------------------
-ExpressDriver.start(dataStore);
+MongoDriver.build(dburi)
+  .then(mongoDriver => ExpressDriver.start(mongoDriver));
+

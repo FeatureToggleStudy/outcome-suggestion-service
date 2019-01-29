@@ -15,6 +15,7 @@ export interface DataStore {
     page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcome[] }>;
   fetchSources(): Promise<string[]>;
+  fetchAreas(): Promise<{ _id: string, areas: string[]}[]>;
 }
 
 export interface OutcomeFilter {
