@@ -226,6 +226,11 @@ export class MongoDriver implements DataStore {
     }
   }
 
+  /**
+   * Returns all areas of standard outcomes, grouped by source.
+   *
+   * NOTE: "area" is stored as the property "name" in the database.
+   */
   public async fetchAreas(): Promise<{ _id: string, areas: string[] }[]> {
     try {
       return this.db.collection(COLLECTIONS.STANDARD_OUTCOMES)

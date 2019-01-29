@@ -90,6 +90,11 @@ export class SuggestionInteractor {
     }
   }
 
+  /**
+   * Fetches all areas of each standard outcome, grouped by source.
+   *
+   * @param dataStore the gateway to the outcome datastore
+   */
   public static async fetchAreas(dataStore: DataStore): Promise<{ _id: string, areas: string[]}[]> {
     try {
       return dataStore.fetchAreas();
