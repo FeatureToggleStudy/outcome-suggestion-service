@@ -1,6 +1,5 @@
-import { ExpressResponder } from '../drivers';
-import { DataStore, Responder } from '../../interfaces/interfaces';
-import { Router, Response } from 'express';
+import { DataStore } from '../../interfaces/interfaces';
+import { Router } from 'express';
 import { SuggestionInteractor } from '../../interactors/interactors';
 import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
 import { StandardOutcome } from '@cyber4all/clark-entity';
@@ -18,10 +17,6 @@ export class ExpressRouteDriver {
     let router: Router = Router();
     e.setRoutes(router);
     return router;
-  }
-
-  private getResponder(response: Response): Responder {
-    return new ExpressResponder(response);
   }
 
   private setRoutes(router: Router): void {
@@ -90,13 +85,13 @@ export class ExpressRouteDriver {
     });
 
     router.get('/outcomes/sources', async (req, res) => {
-      const responder = this.getResponder(res);
       try {
         const sources = await SuggestionInteractor.fetchSources(this.dataStore);
-        responder.sendObject(sources);
+        // TODO: Should this be JSON?
+        res.status(200).send(sources);
       } catch (e) {
         console.error(e);
-        responder.sendOperationError(e);
+        res.sendStatus(500);
       }
     });
     router.get('/outcomes/areas', async (req, res) => {
