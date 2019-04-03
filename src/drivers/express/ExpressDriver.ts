@@ -1,6 +1,5 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { DataStore } from '../../interfaces/interfaces';
 import { ExpressRouteDriver } from '../drivers';
 import * as http from 'http';
 import * as logger from 'morgan';
@@ -8,7 +7,7 @@ import * as cors from 'cors';
 
 export class ExpressDriver {
   static app = express();
-  static start(dataStore: DataStore) {
+  static start() {
     // configure app to use bodyParser()
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(bodyParser.json());
@@ -25,7 +24,7 @@ export class ExpressDriver {
     );
 
     // Set our api routes
-    this.app.use('/', ExpressRouteDriver.buildRouter(dataStore));
+    this.app.use('/', ExpressRouteDriver.buildRouter());
 
     /**
      * Get port from environment and store in Express.
