@@ -14,10 +14,13 @@ export class MongoConnector {
         await driver.connect(dbURI);
         MongoConnector.instance = driver;
     }
+
     private static instance: MongoConnector;
 
     public mongoClient: MongoClient;
-    private constructor() { }
+
+    private constructor() {
+    }
 
     /**
      * Connect to the database. Must be called before any other functions.
@@ -27,20 +30,16 @@ export class MongoConnector {
      *       variable which can only ever be created once, only one
      *       connection will ever be active at a time.
      */
-    async connect(dbURI: string, retryAttempt?: number): Promise<void> {
+    async connect(dbURI: string): Promise<void> {
         try {
-            this.mongoClient = await MongoClient.connect(dbURI);
+            this.mongoClient = await MongoClient.connect(dbURI, {
+                reconnectTries: 30,
+                reconnectInterval: 1000,
+            });
         } catch (e) {
-            if (!retryAttempt) {
-                await this.connect(
-                    dbURI,
-                    1,
-                );
-            } else {
-                return Promise.reject(
-                    'Problem connecting to database at ' + dbURI + ':\n\t' + e,
-                );
-            }
+            return Promise.reject(
+                'Problem connecting to database at ' + dbURI + ':\n\t' + e,
+            );
         }
     }
 
