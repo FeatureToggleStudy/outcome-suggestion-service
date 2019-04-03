@@ -1,7 +1,7 @@
 import * as stemmer from 'stemmer';
 // @ts-ignore spellchecker does not have type definitions
 import * as spellcheck from 'spellchecker';
-import {OutcomeFilter} from '../interfaces/DataStore';
+import {OutcomeFilter} from './OutcomeFilter';
 
 /**
  * Removes undefined properties in Outcome Filter

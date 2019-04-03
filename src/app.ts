@@ -1,14 +1,15 @@
-import { ExpressDriver, MongoDriver } from './drivers/drivers';
+import { ExpressDriver } from './drivers/drivers';
 import * as dotenv from 'dotenv';
+import { MongoConnector } from './Shared/MongoConnector';
 dotenv.config();
 // ----------------------------------------------------------------------------------
 // Initializations
 // ----------------------------------------------------------------------------------
 
-let dburi;
+let dbURI;
 switch (process.env.NODE_ENV) {
   case 'development':
-    dburi = process.env.CLARK_DB_URI_DEV.replace(
+    dbURI = process.env.CLARK_DB_URI_DEV.replace(
       /<DB_PASSWORD>/g,
       process.env.CLARK_DB_PWD,
     )
@@ -16,7 +17,7 @@ switch (process.env.NODE_ENV) {
       .replace(/<DB_NAME>/g, process.env.CLARK_DB_NAME);
     break;
   case 'production':
-    dburi = process.env.CLARK_DB_URI.replace(
+    dbURI = process.env.CLARK_DB_URI.replace(
       /<DB_PASSWORD>/g,
       process.env.CLARK_DB_PWD,
     )
@@ -24,11 +25,14 @@ switch (process.env.NODE_ENV) {
       .replace(/<DB_NAME>/g, process.env.CLARK_DB_NAME);
     break;
   case 'test':
-    dburi = process.env.CLARK_DB_URI_TEST;
+    dbURI = process.env.CLARK_DB_URI_TEST;
     break;
   default:
     break;
 }
-MongoDriver.build(dburi)
-  .then(mongoDriver => ExpressDriver.start(mongoDriver));
+
+MongoConnector.build(dbURI)
+  .then(() => {
+    ExpressDriver.start();
+  });
 

@@ -1,10 +1,10 @@
 import {DataStore} from '../interfaces/DataStore';
-import {OutcomeFilter, suggestMode} from '../interfaces/DataStore';
-
+import {suggestMode} from '../interfaces/DataStore';
 // @ts-ignore stopword does not have type definitions
 import * as stopword from 'stopword';
 import {StandardOutcome} from '@cyber4all/clark-entity';
 import {sanitizeFilter, stemWords} from '../Shared/SanitizeFilter';
+import {OutcomeFilter} from '../Shared/OutcomeFilter';
 
 export class SuggestionInteractor {
   /**
@@ -20,7 +20,7 @@ export class SuggestionInteractor {
    * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
    */
   public static async suggestOutcomes(
-    dataStore: DataStore,
+    dataStore: SuggestionGateway,
     filter: OutcomeFilter,
     mode: suggestMode = 'text',
     threshold: number = 0,
@@ -89,4 +89,14 @@ export class SuggestionInteractor {
       .trim();
     return text;
   }
+}
+
+export interface SuggestionGateway {
+  suggestOutcomes(
+      filter: OutcomeFilter,
+      mode: suggestMode,
+      threshold: number,
+      limit?: number,
+      page?: number,
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }>;
 }

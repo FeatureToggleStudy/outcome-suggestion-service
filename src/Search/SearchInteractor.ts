@@ -8,12 +8,13 @@
  * @param {number} [page]
  * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
  */
-import {DataStore, OutcomeFilter} from '../interfaces/DataStore';
+import {DataStore} from '../interfaces/DataStore';
 import {StandardOutcome} from '@cyber4all/clark-entity';
 import {sanitizeFilter} from '../Shared/SanitizeFilter';
+import {OutcomeFilter} from '../Shared/OutcomeFilter';
 
 export async function searchOutcomes(params: {
-    dataStore: DataStore;
+    dataStore: OutcomeGateway;
     filter: OutcomeFilter;
     limit?: number;
     page?: number;
@@ -28,4 +29,12 @@ export async function searchOutcomes(params: {
     } catch (e) {
         return Promise.reject(`Problem searching outcomes. Error: ${e}.`);
     }
+}
+
+export interface OutcomeGateway {
+    searchOutcomes(
+        filter: OutcomeFilter,
+        limit?: number,
+        page?: number,
+    ): Promise<{ total: number; outcomes: StandardOutcome[] }>;
 }

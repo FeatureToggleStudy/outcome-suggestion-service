@@ -1,9 +1,9 @@
 import { DataStore } from '../../interfaces/DataStore';
 import { Router } from 'express';
-import { SuggestionInteractor } from '../../interactors/SuggestionInteractor';
-import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
-import { StandardOutcome } from '@cyber4all/clark-entity';
-import {searchOutcomes} from '../../Search/SearchInteractor';
+import { SuggestionInteractor } from '../../Suggestion/SuggestionInteractor';
+import * as SuggestionAdapter from '../../Suggestion/ExpressRouteAdapter';
+import * as SearchAdapter from '../../Search/ExpressRouteAdapter';
+import { MongoDriver } from '../MongoDriver';
 
 // tslint:disable-next-line:no-require-imports
 const version = require('../../../package.json').version;
@@ -11,7 +11,8 @@ const version = require('../../../package.json').version;
 export class ExpressRouteDriver {
   constructor(private dataStore: DataStore) {}
 
-  public static buildRouter(dataStore: DataStore): Router {
+  public static buildRouter(): Router {
+    const dataStore = new MongoDriver();
     let e = new ExpressRouteDriver(dataStore);
     let router: Router = Router();
     e.setRoutes(router);
@@ -25,63 +26,8 @@ export class ExpressRouteDriver {
         message: `Welcome to the Learning Outcome Suggestion' API v${version}`,
       });
     });
-
-    router.get('/outcomes', async (req, res) => {
-      try {
-        let filter: OutcomeFilter = {
-          text: req.query.text ? req.query.text : '',
-          source: req.query.author,
-          name: req.query.name,
-          date: req.query.date,
-        };
-        let page = req.query.page ? +req.query.page : undefined;
-        let limit = req.query.limit ? +req.query.limit : undefined;
-        const outcomePayload = await searchOutcomes({
-          dataStore: this.dataStore,
-          filter,
-          limit,
-          page,
-        });
-
-        outcomePayload.outcomes = outcomePayload.outcomes.map(
-          outcome => outcome.toPlainObject() as StandardOutcome,
-        );
-        res.send(outcomePayload);
-      } catch (e) {
-        res.status(500).send(e);
-      }
-    });
-
-    router.get('/outcomes/suggest', async (req, res) => {
-      try {
-        const mode: suggestMode = 'text';
-        const scoreThreshold: number = process.env.SUGGESTION_THRESHOLD
-          ? +process.env.SUGGESTION_THRESHOLD
-          : 0;
-        let filter: OutcomeFilter = {
-          text: req.query.text ? req.query.text : '',
-          source: req.query.author,
-          name: req.query.name,
-          date: req.query.date,
-        };
-        let page = req.query.page ? +req.query.page : undefined;
-        let limit = req.query.limit ? +req.query.limit : undefined;
-        const outcomePayload = await SuggestionInteractor.suggestOutcomes(
-          this.dataStore,
-          filter,
-          mode,
-          scoreThreshold,
-          limit,
-          page,
-        );
-        outcomePayload.outcomes = outcomePayload.outcomes.map(
-          outcome => outcome.toPlainObject() as StandardOutcome,
-        );
-        res.send(outcomePayload);
-      } catch (e) {
-        res.status(500).send(e);
-      }
-    });
+    router.use(SearchAdapter.buildRouter());
+    router.use(SuggestionAdapter.buildRouter());
 
     router.get('/outcomes/sources', async (req, res) => {
       try {
