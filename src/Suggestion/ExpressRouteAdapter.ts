@@ -1,9 +1,9 @@
-import {suggestMode} from '../interfaces/DataStore';
 import {Router} from 'express';
 import {OutcomeFilter} from '../Shared/OutcomeFilter';
 import {SuggestionInteractor} from './SuggestionInteractor';
 import {StandardOutcome} from '@cyber4all/clark-entity';
 import {MongoSuggestionGateway} from './MongoSuggestionGateway';
+import {suggestMode} from './SuggestMode';
 
 export function buildRouter(): Router {
     // TODO: Experiment with a DI pattern or some other way of resolving dependencies at a higher level

@@ -1,11 +1,13 @@
 import { Collection } from 'mongodb';
 import { OutcomeFilter } from '../Shared/OutcomeFilter';
-import { suggestMode } from '../interfaces/DataStore';
 import { StandardOutcome } from '@cyber4all/clark-entity';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
-import { COLLECTIONS } from '../drivers/MongoDriver';
 import { MongoConnector } from '../Shared/MongoConnector';
+import {suggestMode} from './SuggestMode';
 
+const COLLECTIONS = {
+    STANDARD_OUTCOMES: 'outcomes',
+};
 export class MongoSuggestionGateway {
     private standardOutcomes: Collection<StandardOutcomeDocument>;
 
@@ -24,7 +26,6 @@ export class MongoSuggestionGateway {
      * @param {number} [limit]
      * @param {number} [page]
      * @returns {Promise<{ total: number; outcomes: StandardOutcome[] }>}
-     * @memberof MongoDriver
      */
     public async suggestOutcomes(
         filter: OutcomeFilter,
