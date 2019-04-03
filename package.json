@@ -38,6 +38,7 @@
     "stopword": "^0.1.10"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.4",
     "@types/dotenv": "^4.0.2",
     "@types/express": "^4.0.39",
     "@types/express-jwt": "0.0.40",
