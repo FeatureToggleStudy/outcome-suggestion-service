@@ -5,7 +5,6 @@ import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
 import { StandardOutcome } from '@cyber4all/clark-entity';
 import {searchOutcomes} from '../../Search/SearchInteractor';
 
-const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 // tslint:disable-next-line:no-require-imports
 const version = require('../../../package.json').version;
 
