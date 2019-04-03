@@ -1,9 +1,9 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { ExpressRouteDriver } from '../drivers';
 import * as http from 'http';
 import * as logger from 'morgan';
 import * as cors from 'cors';
+import {ExpressRouteDriver} from './ExpressRouteDriver';
 
 export class ExpressDriver {
   static app = express();

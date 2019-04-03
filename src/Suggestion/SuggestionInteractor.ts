@@ -1,10 +1,9 @@
-import {DataStore} from '../interfaces/DataStore';
-import {suggestMode} from '../interfaces/DataStore';
 // @ts-ignore stopword does not have type definitions
 import * as stopword from 'stopword';
 import {StandardOutcome} from '@cyber4all/clark-entity';
 import {sanitizeFilter, stemWords} from '../Shared/SanitizeFilter';
 import {OutcomeFilter} from '../Shared/OutcomeFilter';
+import {suggestMode} from './SuggestMode';
 
 export class SuggestionInteractor {
   /**
@@ -40,35 +39,6 @@ export class SuggestionInteractor {
       );
     } catch (e) {
       return Promise.reject(`Problem suggesting outcomes. Error: ${e}.`);
-    }
-  }
-
-  /**
-   * Fetches all Standard Outcome sources
-   *
-   * @static
-   * @param {DataStore} dataStore
-   * @returns {Promise<string[]>}
-   * @memberof SuggestionInteractor
-   */
-  public static async fetchSources(dataStore: DataStore): Promise<string[]> {
-    try {
-      return dataStore.fetchSources();
-    } catch (e) {
-      return Promise.reject(`Problem finding sources. Error: ${e}.`);
-    }
-  }
-
-  /**
-   * Fetches all areas of each standard outcome, grouped by source.
-   *
-   * @param dataStore the gateway to the outcome datastore
-   */
-  public static async fetchAreas(dataStore: DataStore): Promise<{ _id: string, areas: string[]}[]> {
-    try {
-      return dataStore.fetchAreas();
-    } catch (e) {
-      return Promise.reject(`Problem finding sources. Error: ${e}.`);
     }
   }
 
