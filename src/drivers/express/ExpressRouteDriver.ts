@@ -1,6 +1,6 @@
-import { DataStore } from '../../interfaces/interfaces';
+import { DataStore } from '../../interfaces/DataStore';
 import { Router } from 'express';
-import { SuggestionInteractor } from '../../interactors/interactors';
+import { SuggestionInteractor } from '../../interactors/SuggestionInteractor';
 import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
 import { StandardOutcome } from '@cyber4all/clark-entity';
 import {searchOutcomes} from '../../Search/SearchInteractor';

@@ -1,5 +1,5 @@
 import { MongoClient, Db } from 'mongodb';
-import { DataStore } from '../interfaces/interfaces';
+import { DataStore } from '../interfaces/DataStore';
 import { StandardOutcomeDocument } from '@cyber4all/clark-schema';
 import { OutcomeFilter, suggestMode } from '../interfaces/DataStore';
 import * as dotenv from 'dotenv';

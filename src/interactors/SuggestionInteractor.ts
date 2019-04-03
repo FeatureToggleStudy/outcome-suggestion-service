@@ -1,4 +1,4 @@
-import {DataStore} from '../interfaces/interfaces';
+import {DataStore} from '../interfaces/DataStore';
 import {OutcomeFilter, suggestMode} from '../interfaces/DataStore';
 
 // @ts-ignore stopword does not have type definitions

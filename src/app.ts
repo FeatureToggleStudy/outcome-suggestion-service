@@ -1,5 +1,4 @@
 import { ExpressDriver, MongoDriver } from './drivers/drivers';
-import { DataStore } from './interfaces/interfaces';
 import * as dotenv from 'dotenv';
 dotenv.config();
 // ----------------------------------------------------------------------------------

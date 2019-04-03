@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { DataStore } from '../../interfaces/interfaces';
+import { DataStore } from '../../interfaces/DataStore';
 import { ExpressRouteDriver } from '../drivers';
 import * as http from 'http';
 import * as logger from 'morgan';
