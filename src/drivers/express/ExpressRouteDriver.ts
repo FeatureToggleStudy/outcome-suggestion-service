@@ -4,6 +4,7 @@ import { Router, Response } from 'express';
 import { SuggestionInteractor } from '../../interactors/interactors';
 import { OutcomeFilter, suggestMode } from '../../interfaces/DataStore';
 import { StandardOutcome } from '@cyber4all/clark-entity';
+import {searchOutcomes} from '../../Search/SearchInteractor';
 
 const threshold = parseFloat(process.env.CLARK_LO_SUGGESTION_THRESHOLD);
 // tslint:disable-next-line:no-require-imports
@@ -41,7 +42,7 @@ export class ExpressRouteDriver {
         };
         let page = req.query.page ? +req.query.page : undefined;
         let limit = req.query.limit ? +req.query.limit : undefined;
-        const outcomePayload = await SuggestionInteractor.searchOutcomes({
+        const outcomePayload = await searchOutcomes({
           dataStore: this.dataStore,
           filter,
           limit,
