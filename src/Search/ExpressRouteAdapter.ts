@@ -35,7 +35,7 @@ export function buildRouter() {
     });
     router.get('/outcomes/sources', async (req, res) => {
         try {
-            const sources = await fetchSources(this.dataStore);
+            const sources = await fetchSources(dataStore);
             // TODO: Should this be JSON?
             res.status(200).send(sources);
         } catch (e) {
@@ -45,7 +45,7 @@ export function buildRouter() {
     });
     router.get('/outcomes/areas', async (req, res) => {
         try {
-            const areas = await fetchAreas(this.dataStore);
+            const areas = await fetchAreas(dataStore);
             res.json(areas);
         } catch (e) {
             res.status(500).send('Internal Server Error');
