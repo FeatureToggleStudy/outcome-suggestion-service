@@ -58,19 +58,10 @@ workflows:
   build-and-test:
     jobs:
       - build
-      - integration-test:
-          requires:
-            - build
 
   build-test-and-deploy-production:
     jobs:
       - build:
-          filters:
-            branches:
-              only: /master/
-      - integration-test:
-          requires:
-            - build
           filters:
             branches:
               only: /master/
