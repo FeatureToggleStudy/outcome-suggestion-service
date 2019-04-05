@@ -9,7 +9,7 @@ import {generateDbURI} from '../Shared/GenerateDbURI';
 process.env.NODE_ENV = 'development';
 
 /**
- * Theses test ensure that the responses sent from the search module routes are in compliance with the
+ * These tests ensure that the responses sent from the search module routes are in compliance with the
  * APIs projected contract.
  */
 describe('Search Routes', () => {
