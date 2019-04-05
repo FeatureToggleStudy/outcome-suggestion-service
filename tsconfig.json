@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -8,12 +8,17 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": [
-      "es2015",
+      "es7",
       "dom"
     ],
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "downlevelIteration": true,
-    "allowUnusedLabels": false
-  }
+    "allowUnusedLabels": false,
+    "types": ["jest"]
+  },
+  "exclude": [
+    "node_modules",
+    "src/**/*.spec.ts"
+  ]
 }
