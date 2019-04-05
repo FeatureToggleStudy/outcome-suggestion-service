@@ -1,11 +1,11 @@
-import {OutcomeFilter} from '../Shared/OutcomeFilter';
-import {fetchAreas, fetchSources, searchOutcomes} from './SearchInteractor';
-import {StandardOutcome} from '@cyber4all/clark-entity';
-import {Router} from 'express';
-import {MongoSearchGateway} from './MongoSearchGateway';
+import { OutcomeFilter } from '../Shared/OutcomeFilter';
+import { fetchAreas, fetchSources, searchOutcomes } from './SearchInteractor';
+import { StandardOutcome } from '@cyber4all/clark-entity';
+import { Router } from 'express';
+import { SearchGatewayFacade } from './SearchGatewayFacade';
 
 export function buildRouter() {
-    const dataStore = new MongoSearchGateway();
+    const dataStore = new SearchGatewayFacade();
 
     const router = Router() ;
     router.get('/outcomes', async (req, res) => {
