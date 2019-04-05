@@ -9,7 +9,7 @@ import * as express from 'express';
 process.env.NODE_ENV = 'development';
 
 /**
- * Theses test ensure that the responses sent from the suggest module routes are in compliance with the
+ * These tests ensure that the responses sent from the suggest module routes are in compliance with the
  * APIs projected contract.
  *
  * NOTE:
