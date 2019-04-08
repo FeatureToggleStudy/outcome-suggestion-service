@@ -3,6 +3,7 @@ import { fetchAreas, fetchSources, searchOutcomes } from './SearchInteractor';
 import { StandardOutcome } from '@cyber4all/clark-entity';
 import { Router } from 'express';
 import { SearchGatewayFacade } from './SearchGatewayFacade';
+import {reportError} from '../Shared/SentryConnector';
 
 export function buildRouter() {
     const dataStore = new SearchGatewayFacade();
@@ -30,6 +31,7 @@ export function buildRouter() {
             );
             res.send(outcomePayload);
         } catch (e) {
+            reportError(e);
             res.status(500).send(e);
         }
     });
@@ -39,7 +41,7 @@ export function buildRouter() {
             // TODO: Should this be JSON?
             res.status(200).send(sources);
         } catch (e) {
-            console.error(e);
+            reportError(e);
             res.sendStatus(500);
         }
     });
@@ -48,6 +50,7 @@ export function buildRouter() {
             const areas = await fetchAreas(dataStore);
             res.json(areas);
         } catch (e) {
+            reportError(e);
             res.status(500).send('Internal Server Error');
         }
     });

@@ -4,6 +4,7 @@ import {SuggestionInteractor} from './SuggestionInteractor';
 import {StandardOutcome} from '@cyber4all/clark-entity';
 import {MongoSuggestionGateway} from './MongoSuggestionGateway';
 import {suggestMode} from './SuggestMode';
+import {reportError} from '../Shared/SentryConnector';
 
 export function buildRouter(): Router {
     // TODO: Experiment with a DI pattern or some other way of resolving dependencies at a higher level
@@ -37,6 +38,7 @@ export function buildRouter(): Router {
             );
             res.send(outcomePayload);
         } catch (e) {
+            reportError(e);
             res.status(500).send(e);
         }
     });
