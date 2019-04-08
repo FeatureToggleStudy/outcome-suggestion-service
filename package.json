@@ -33,7 +33,7 @@
     "morgan": "^1.9.0",
     "spellchecker": "^3.4.4",
     "stemmer": "^1.0.2",
-    "stopword": "^0.1.10"
+    "stopword": "^0.2.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.4",
