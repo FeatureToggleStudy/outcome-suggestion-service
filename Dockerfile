@@ -1,8 +1,6 @@
 # Anything beyond local dev should pin this to a specific version at https://hub.docker.com/_/node/
 FROM node:8 as builder
 
-ARG UNIT_TEST=0
-
 RUN mkdir -p /opt/app
 
 # check every 30s to ensure this service returns HTTP 200
@@ -18,17 +16,10 @@ ENV PATH /opt/node_modules/.bin:$PATH
 WORKDIR /opt/app
 COPY . /opt/app
 
+RUN npm test
+
 # Build source and clean up
 RUN npm run build
-
-FROM node:8 as tester
-
-COPY --from=builder . .
-ENV PATH /opt/node_modules/.bin:$PATH
-
-# Swtich working dir to opt to use node_modules for testing
-WORKDIR /opt
-RUN if [ "$UNIT_TEST" = "1" ] ; then npm test ; else echo Not running unit tests ; fi
 
 FROM node:8-alpine
 # Defaults the node environment to production, however compose will override this to use development
