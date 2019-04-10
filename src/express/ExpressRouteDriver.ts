@@ -3,7 +3,7 @@ import * as SuggestionAdapter from '../Suggestion/ExpressRouteAdapter';
 import * as SearchAdapter from '../Search/ExpressRouteAdapter';
 
 // tslint:disable-next-line:no-require-imports
-const version = require('../../../package.json').version;
+const version = require('../../package.json').version;
 
 export class ExpressRouteDriver {
   public static buildRouter(): Router {
