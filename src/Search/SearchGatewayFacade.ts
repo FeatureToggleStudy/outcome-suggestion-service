@@ -2,6 +2,7 @@ import { OutcomeGateway } from './SearchInteractor';
 import { OutcomeFilter } from '../Shared/OutcomeFilter';
 import { StandardOutcome } from '@cyber4all/clark-entity';
 import { MongoSearchGateway } from './MongoSearchGateway';
+import { ElasticSearchGateway } from './ElasticSearchGateway';
 
 /**
  * SearchGatewayFacade is a means to abstract away the delegation of queries between
@@ -13,17 +14,23 @@ import { MongoSearchGateway } from './MongoSearchGateway';
  */
 export class SearchGatewayFacade implements OutcomeGateway {
   mongoGateway: MongoSearchGateway;
+  elasticSearchGateway: ElasticSearchGateway;
 
   constructor() {
     this.mongoGateway = new MongoSearchGateway();
+    this.elasticSearchGateway = new ElasticSearchGateway();
   }
-  searchOutcomes(filter: OutcomeFilter, limit?: number, page?: number): Promise<{ total: number; outcomes: StandardOutcome[]; }> {
-    return this.mongoGateway.searchOutcomes(filter, limit, page);
+  searchOutcomes(
+    filter: OutcomeFilter,
+    limit?: number,
+    page?: number,
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
+    return this.elasticSearchGateway.searchOutcomes(filter, limit, page);
   }
   fetchSources(): Promise<string[]> {
     return this.mongoGateway.fetchSources();
   }
-  fetchAreas(): Promise<{ _id: string; areas: string[]; }[]> {
+  fetchAreas(): Promise<{ _id: string; areas: string[] }[]> {
     return this.mongoGateway.fetchAreas();
   }
 }
