@@ -11,6 +11,9 @@ import {
 const SEARCHABLE_FIELDS = ['author', 'source', 'name', 'outcome'];
 
 export class ElasticSearchGateway implements Partial<OutcomeGateway> {
+  private analyzers = {
+    stop_words: 'stop',
+  };
   /**
    * Performs search on guidelines using ElasticSearch node
    *
@@ -71,6 +74,7 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
       query.query_string = {
         fields: SEARCHABLE_FIELDS,
         query: text || '*',
+        analyzer: this.analyzers.stop_words,
       };
     }
 
@@ -114,7 +118,11 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
 
     if (text) {
       multiMatchQuery.bool.must.push({
-        multi_match: { fields: searchableFields, query: text },
+        multi_match: {
+          fields: searchableFields,
+          query: text,
+          analyzer: this.analyzers.stop_words,
+        },
       });
     }
 

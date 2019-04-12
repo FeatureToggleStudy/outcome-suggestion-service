@@ -10,6 +10,9 @@ import {
 import { suggestMode } from './SuggestMode';
 
 export class ElasticSuggestionGateway implements SuggestionGateway {
+  private analyzers = {
+    stop_words: 'stop',
+  };
   suggestOutcomes(
     filter: OutcomeFilter,
     _: suggestMode,
@@ -39,6 +42,7 @@ export class ElasticSuggestionGateway implements SuggestionGateway {
     let query = {
       query_string: {
         query: filter.text,
+        analyzer: this.analyzers.stop_words,
       },
     };
     if (limit > 0) {
