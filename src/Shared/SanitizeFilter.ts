@@ -1,4 +1,3 @@
-import * as stemmer from 'stemmer';
 import { OutcomeFilter } from './OutcomeFilter';
 
 /**
@@ -21,20 +20,4 @@ export function sanitizeFilter(filter: OutcomeFilter): OutcomeFilter {
     filter.text = '';
   }
   return filter;
-}
-/**
- * Returns stems for words in a string
- *
- * @private
- * @static
- * @param {string} text
- * @returns {string}
- */
-export function stemWords(text: string): string {
-  text = text
-    .split(' ')
-    .map(word => stemmer(word))
-    .join(' ')
-    .trim();
-  return text;
 }

@@ -33,9 +33,7 @@
     "mongodb": "^3.1.13",
     "morgan": "^1.9.0",
     "request-promise": "^4.2.4",
-    "spellchecker": "^3.4.4",
-    "stemmer": "^1.0.2",
-    "stopword": "^0.1.10"
+    "stemmer": "^1.0.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.4",
