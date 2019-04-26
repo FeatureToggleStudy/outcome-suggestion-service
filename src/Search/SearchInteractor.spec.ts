@@ -75,10 +75,53 @@ describe('SearchInteractor', () => {
             expect(res.total).toEqual(expect.any(Number));
         });
     });
+    it('should return standard outcomes matching the specified date.', () => {
+        const filter: OutcomeFilter = {
+            date: '2014',
+        };
+        return SearchInteractor.searchOutcomes(
+            {
+                dataStore,
+                filter,
+            },
+        ).then(res => {
+            expect(res.outcomes[0]).toMatchObject({
+                id: expect.any(String),
+                author: expect.any(String),
+                source: expect.any(String),
+                name: expect.any(String),
+                date: expect.any(String),
+                outcome: expect.any(String),
+            });
+            expect(res.total).toEqual(expect.any(Number));
+        });
+    });
     it('should return all standard outcomes under the specified author and text', () => {
         const filter: OutcomeFilter = {
             text: 'risk management',
             source: 'CAE Cyber Defense',
+        };
+        return SearchInteractor.searchOutcomes(
+            {
+                dataStore,
+                filter,
+            },
+        ).then(res => {
+            expect(res.outcomes[0]).toMatchObject({
+                id: expect.any(String),
+                author: expect.any(String),
+                source: expect.any(String),
+                name: expect.any(String),
+                date: expect.any(String),
+                outcome: expect.any(String),
+            });
+            expect(res.total).toEqual(expect.any(Number));
+        });
+    });
+    it('should return all standard outcomes under the specified date and text', () => {
+        const filter: OutcomeFilter = {
+            text: 'risk management',
+            date: '2017',
         };
         return SearchInteractor.searchOutcomes(
             {
