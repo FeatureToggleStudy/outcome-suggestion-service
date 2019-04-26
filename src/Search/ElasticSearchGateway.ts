@@ -61,8 +61,15 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
     page?: number;
     limit?: number;
   }): ElasticSearchQuery {
-    let query: { [queryKey: string]: any } = {};
-    let paginator = {};
+    let query: {
+      [queryKey: string]: any,
+    } = {};
+    let paginator = { from: 0, size: 0 };
+    let post_filter: {
+        bool: {
+        must: any[],
+      },
+    };
     const fieldQuery = { ...filter };
     delete fieldQuery.text;
 
@@ -70,19 +77,57 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
 
     if (Object.keys(fieldQuery).length > 0) {
       query = this.buildMultiMatchQuery({ fieldQuery, text });
-    } else {
+
+    } else if (!text || text.length === 0) {
       query.query_string = {
         fields: SEARCHABLE_FIELDS,
-        query: text || '*',
-        analyzer: this.analyzers.stop_words,
+        query: '*',
+      };
+    } else {
+      query.bool = {
+        should: [
+          {
+            multi_match: {
+              fields: SEARCHABLE_FIELDS,
+              query: text,
+              fuzziness: 'AUTO',
+              slop: 3,
+              analyzer: 'stop',
+            },
+          },
+          {
+            match_phrase_prefix: {
+              outcome: {
+                query: text,
+                max_expansions: 4,
+                slop: 3,
+              },
+            },
+          },
+          {
+            match_phrase_prefix: {
+              name: {
+                query: text,
+                max_expansions: 4,
+                slop: 3,
+              },
+            },
+          },
+        ],
       };
     }
 
     if (limit > 0) {
       paginator = buildPaginator({ limit, page });
+    } else {
+      paginator.size = 20;
     }
 
-    return { query, ...paginator };
+    if (fieldQuery.source) {
+      post_filter = this.appendPostFilterStage({ fieldQuery });
+    }
+
+    return { query, post_filter, ...paginator };
   }
 
   /**
@@ -109,24 +154,45 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
     const searchableFields = SEARCHABLE_FIELDS.filter(
       field => Object.keys(fieldQuery).indexOf(field) === -1,
     );
-    let multiMatchQuery = {
-      bool: {
-        // @ts-ignore Empty array assignment is valid
-        must: [],
-      },
+    let multiMatchQuery: {
+        bool: any,
+    } = {
+        bool: {
+          // @ts-ignore Empty array assignment is valid
+          should: [],
+        },
+
     };
 
     if (text) {
-      multiMatchQuery.bool.must.push({
+      multiMatchQuery.bool.should.push({
         multi_match: {
           fields: searchableFields,
           query: text,
-          analyzer: this.analyzers.stop_words,
+          fuzziness: 'AUTO',
+          slop: 3,
+          analyzer: 'stop',
         },
-      });
+      },
+                                       {
+          match_phrase_prefix: {
+            outcome: {
+              query: text,
+              max_expansions: 4,
+              slop: 3,
+            },
+          },
+        },
+                                       {
+          match_phrase_prefix: {
+            name: {
+              query: text,
+              max_expansions: 4,
+              slop: 3,
+            },
+          },
+        });
     }
-
-    multiMatchQuery = this.appendFieldMatchers({ fieldQuery, multiMatchQuery });
 
     return multiMatchQuery;
   }
@@ -136,13 +202,11 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
    *
    * @private
    * @param {{[x: string]: string;source?: string;name?: string;date?: string;}} fieldQuery [Object containing field query keys and values]
-   * @param {{bool: {must: any[]}}} multiMatchQuery [The existing query object to append field matchers to]
-   * @returns  { [queryKey: string]: any }
+   * @returns  { post_filter: {bool: { must: any[] } } }
    * @memberof ElasticSearchGateway
    */
-  private appendFieldMatchers({
+  private appendPostFilterStage({
     fieldQuery,
-    multiMatchQuery,
   }: {
     fieldQuery: {
       [x: string]: string;
@@ -150,20 +214,22 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
       name?: string;
       date?: string;
     };
-    multiMatchQuery: {
-      bool: {
-        must: any[];
-      };
-    };
   }) {
-    const fieldMatchQuery = { ...multiMatchQuery };
+    let postFilterQuery = {
+      bool: {
+        // @ts-ignore Empty array assignment is valid
+        must: [],
+      },
+    };
+
     const fieldQueryKeys = Object.keys(fieldQuery);
     for (const key of fieldQueryKeys) {
       const value = fieldQuery[key] != null ? fieldQuery[key] : '*';
-      const matcher = { match: {} };
-      matcher.match[`${key}.keyword`] = value;
-      fieldMatchQuery.bool.must.push(matcher as any);
+      const filter = { term: {} };
+      filter.term[`${key}.keyword`] = value;
+      postFilterQuery.bool.must.push(filter as any);
     }
-    return fieldMatchQuery;
+    return postFilterQuery;
+
   }
 }

@@ -10,11 +10,9 @@ import {
 } from './Errors';
 
 const ELASTIC_SEARCH_URI = process.env.ELASTIC_SEARCH_URI;
-const GUIDELINE_URI = `${ELASTIC_SEARCH_URI}/guidelines/_search`;
+const GUIDELINE_URI = `${ELASTIC_SEARCH_URI}/enguidelines/_search`;
 
-export interface ElasticSearchQuery {
-  query: { [queryKey: string]: any };
-}
+export interface ElasticSearchQuery { [queryKey: string]: any; }
 
 export interface ElasticSearchPaginator {
   from: number;
