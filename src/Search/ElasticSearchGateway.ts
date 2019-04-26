@@ -65,6 +65,7 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
       [queryKey: string]: any,
     } = {};
     let paginator = { from: 0, size: 0 };
+    const defaultLimit = 20;
     let post_filter: {
       bool: {
         must: any[],
@@ -74,57 +75,21 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
     delete fieldQuery.text;
 
     const text = filter.text;
-
-    if (Object.keys(fieldQuery).length > 0) {
+    const hasText = text || text.length > 0;
+    if (hasText) {
       query = this.buildMultiMatchQuery({ fieldQuery, text });
-
-    } else if (!text || text.length === 0) {
+    } else {
       query.query_string = {
         fields: SEARCHABLE_FIELDS,
         query: '*',
       };
-    } else {
-      query.bool = {
-        should: [
-          {
-            multi_match: {
-              fields: SEARCHABLE_FIELDS,
-              query: text,
-              fuzziness: 'AUTO',
-              slop: 3,
-              analyzer: 'stop',
-            },
-          },
-          {
-            match_phrase_prefix: {
-              outcome: {
-                query: text,
-                max_expansions: 4,
-                slop: 3,
-              },
-            },
-          },
-          {
-            match_phrase_prefix: {
-              name: {
-                query: text,
-                max_expansions: 4,
-                slop: 3,
-              },
-            },
-          },
-        ],
-      };
     }
 
-    if (limit > 0) {
-      paginator = buildPaginator({ limit, page });
-    } else {
-      limit = 20;
-      paginator = buildPaginator({ limit, page });
-    }
 
-    if (fieldQuery.source) {
+    limit = limit || defaultLimit;
+    paginator = buildPaginator({ limit, page });
+
+    if (fieldQuery.source || fieldQuery.date) {
       post_filter = this.appendPostFilterStage({ fieldQuery });
     }
 
@@ -152,48 +117,46 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
     };
     text: string;
   }): { [queryKey: string]: any } {
-    const searchableFields = SEARCHABLE_FIELDS.filter(
-      field => Object.keys(fieldQuery).indexOf(field) === -1,
-    );
-    let multiMatchQuery: {
-      bool: any,
-    } = {
+    let searchableFields = SEARCHABLE_FIELDS;
+    if (fieldQuery && Object.keys(fieldQuery).length) {
+      searchableFields = SEARCHABLE_FIELDS.filter(
+        field => Object.keys(fieldQuery).indexOf(field) === -1,
+      );
+    }
+    const multiMatchQuery = {
       bool: {
-        // @ts-ignore Empty array assignment is valid
-        should: [],
-      },
-
+        should: [
+          {
+            multi_match: {
+              fields: searchableFields,
+              query: text,
+              fuzziness: 'AUTO',
+              slop: 3,
+              analyzer: 'stop',
+            },
+          },
+          {
+            match_phrase_prefix: {
+              outcome: {
+                query: text,
+                max_expansions: 4,
+                slop: 3,
+              },
+            },
+          },
+          {
+            match_phrase_prefix: {
+              name: {
+                query: text,
+                max_expansions: 4,
+                slop: 3,
+              },
+            },
+          },
+        ],
+      }
     };
 
-    if (text) {
-      multiMatchQuery.bool.should.push({
-        multi_match: {
-          fields: searchableFields,
-          query: text,
-          fuzziness: 'AUTO',
-          slop: 3,
-          analyzer: 'stop',
-        },
-      },
-        {
-          match_phrase_prefix: {
-            outcome: {
-              query: text,
-              max_expansions: 4,
-              slop: 3,
-            },
-          },
-        },
-        {
-          match_phrase_prefix: {
-            name: {
-              query: text,
-              max_expansions: 4,
-              slop: 3,
-            },
-          },
-        });
-    }
 
     return multiMatchQuery;
   }
