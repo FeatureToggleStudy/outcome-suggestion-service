@@ -66,7 +66,7 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
     } = {};
     let paginator = { from: 0, size: 0 };
     let post_filter: {
-        bool: {
+      bool: {
         must: any[],
       },
     };
@@ -120,7 +120,8 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
     if (limit > 0) {
       paginator = buildPaginator({ limit, page });
     } else {
-      paginator.size = 20;
+      limit = 20;
+      paginator = buildPaginator({ limit, page });
     }
 
     if (fieldQuery.source) {
@@ -155,12 +156,12 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
       field => Object.keys(fieldQuery).indexOf(field) === -1,
     );
     let multiMatchQuery: {
-        bool: any,
+      bool: any,
     } = {
-        bool: {
-          // @ts-ignore Empty array assignment is valid
-          should: [],
-        },
+      bool: {
+        // @ts-ignore Empty array assignment is valid
+        should: [],
+      },
 
     };
 
@@ -174,7 +175,7 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
           analyzer: 'stop',
         },
       },
-                                       {
+        {
           match_phrase_prefix: {
             outcome: {
               query: text,
@@ -183,7 +184,7 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
             },
           },
         },
-                                       {
+        {
           match_phrase_prefix: {
             name: {
               query: text,
