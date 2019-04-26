@@ -78,7 +78,7 @@ describe('SearchInteractor', () => {
     it('should return all standard outcomes under the specified author and text', () => {
         const filter: OutcomeFilter = {
             text: 'risk management',
-            source: 'CS2013',
+            source: 'CAE Cyber Defense',
         };
         return SearchInteractor.searchOutcomes(
             {
@@ -111,6 +111,29 @@ describe('SearchInteractor', () => {
             expect(res.outcomes[0]).toEqual(undefined)
             expect(res.total).toEqual(expect.any(Number));
             console.log(res.total);
+        });
+    });
+    it('should return standard outcomes matching the specified source,date and text', () => {
+        const filter: OutcomeFilter = {
+            text: 'machine level',
+            source: 'CAE CDE 2019',
+            date: '2019',
+        };
+        return SearchInteractor.searchOutcomes(
+            {
+                dataStore,
+                filter,
+            },
+        ).then(res => {
+            expect(res.outcomes[0]).toMatchObject({
+                id: expect.any(String),
+                author: expect.any(String),
+                source: expect.any(String),
+                name: expect.any(String),
+                date: expect.any(String),
+                outcome: expect.any(String),
+            });
+            expect(res.total).toEqual(expect.any(Number));
         });
     });
 });
