@@ -32,7 +32,7 @@
     "express-jwt": "^5.3.0",
     "mongodb": "^3.1.13",
     "morgan": "^1.9.0",
-    "spellchecker": "^3.4.4",
+    "spellchecker": "^3.5.3",
     "stemmer": "^1.0.2",
     "stopword": "^0.1.10"
   },
