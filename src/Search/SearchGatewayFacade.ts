@@ -14,19 +14,23 @@ import { ElasticSearchGateway } from './ElasticSearchGateway';
  */
 export class SearchGatewayFacade implements OutcomeGateway {
   mongoGateway: MongoSearchGateway;
-  elasticGateway: ElasticSearchGateway;
+  elasticSearchGateway: ElasticSearchGateway;
 
   constructor() {
     this.mongoGateway = new MongoSearchGateway();
-    this.elasticGateway = new ElasticSearchGateway();
+    this.elasticSearchGateway = new ElasticSearchGateway();
   }
-  searchOutcomes(filter: OutcomeFilter, limit?: number, page?: number): Promise<{ total: number; outcomes: StandardOutcome[]; }> {
-    return this.mongoGateway.searchOutcomes(filter, limit, page);
+  searchOutcomes(
+    filter: OutcomeFilter,
+    limit?: number,
+    page?: number,
+  ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
+    return this.elasticSearchGateway.searchOutcomes(filter, limit, page);
   }
   fetchSources(): Promise<string[]> {
     return this.mongoGateway.fetchSources();
   }
-  fetchAreas(): Promise<{ _id: string; areas: string[]; }[]> {
+  fetchAreas(): Promise<{ _id: string; areas: string[] }[]> {
     return this.mongoGateway.fetchAreas();
   }
 }
