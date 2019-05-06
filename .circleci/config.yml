@@ -67,7 +67,7 @@ workflows:
               only: /master/
       - deploy-production:
           requires:
-            - integration-test
+            - build
           filters:
             branches:
               only: /master/
