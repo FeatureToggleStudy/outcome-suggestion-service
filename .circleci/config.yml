@@ -66,6 +66,8 @@ workflows:
             branches:
               only: /master/
       - deploy-production:
+          requires:
+            - build
           filters:
             branches:
               only: /master/
