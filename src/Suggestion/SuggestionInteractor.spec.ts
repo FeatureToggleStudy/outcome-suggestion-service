@@ -45,4 +45,4 @@ describe('SearchInteractor', () => {
             expect(res.total).toEqual(0);
         });
     });
-})
+});

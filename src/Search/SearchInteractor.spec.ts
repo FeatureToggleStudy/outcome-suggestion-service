@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import * as SearchInteractor from './SearchInteractor'
+import * as SearchInteractor from './SearchInteractor';
 import { SearchGatewayFacade } from './SearchGatewayFacade';
 import { OutcomeFilter } from '../Shared/OutcomeFilter';
 import { MongoConnector } from '../Shared/MongoConnector';
@@ -151,7 +151,7 @@ describe('SearchInteractor', () => {
                 filter,
             },
         ).then(res => {
-            expect(res.outcomes[0]).toEqual(undefined)
+            expect(res.outcomes[0]).toEqual(undefined);
             expect(res.total).toEqual(expect.any(Number));
             console.log(res.total);
         });
