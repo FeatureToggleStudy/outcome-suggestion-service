@@ -11,9 +11,6 @@ import {
 const SEARCHABLE_FIELDS = ['author', 'source', 'name', 'outcome'];
 
 export class ElasticSearchGateway implements Partial<OutcomeGateway> {
-  private analyzers = {
-    stop_words: 'stop',
-  };
   /**
    * Performs search on guidelines using ElasticSearch node
    *
