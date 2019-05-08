@@ -19,13 +19,24 @@ export class SearchGatewayFacade implements OutcomeGateway {
   constructor() {
     this.mongoGateway = new MongoSearchGateway();
     this.elasticSearchGateway = new ElasticSearchGateway();
+    const useElasticForSearch = process.env.ELASTIC_TOGGLE === 'true';
+    this.searchOutcomes = useElasticForSearch
+      ? (filter: OutcomeFilter, limit?: number, page?: number) => this.elasticSearchGateway.searchOutcomes(filter, limit, page)
+      : (filter: OutcomeFilter, limit?: number, page?: number) => this.mongoGateway.searchOutcomes(filter, limit, page);
+    console.log(`Configured to use ${useElasticForSearch ? 'ElasticSearch' : 'MongoDB'} for outcome search.`);
   }
+
+  /**
+   * This method is overridden when the SearchGatewayFacade is built. Depending on the existance
+   * of the ELASTIC_TOGGLE to happen
+   * just once when the class is constructed, rather than on each call to searchOutcomes.
+   */
   searchOutcomes(
     filter: OutcomeFilter,
     limit?: number,
     page?: number,
   ): Promise<{ total: number; outcomes: StandardOutcome[] }> {
-    return this.elasticSearchGateway.searchOutcomes(filter, limit, page);
+    throw new Error('No datastore has been set for search');
   }
   fetchSources(): Promise<string[]> {
     return this.mongoGateway.fetchSources();
