@@ -43,6 +43,9 @@ export function queryGuidelines(
       uri: GUIDELINE_URI,
       json: true,
       body: query,
+      headers: {
+        'Host': process.env.ELASTIC_SEARCH_HEADER,
+      },
     })
       .then((res: SearchResponse<Partial<StandardOutcome>>) =>
         resolve(toPaginatedGuidelines(res)),
