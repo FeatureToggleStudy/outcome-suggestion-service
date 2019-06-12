@@ -1,13 +1,17 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { ExpressRouteDriver } from '../drivers';
 import * as http from 'http';
 import * as logger from 'morgan';
 import * as cors from 'cors';
+import {ExpressRouteDriver} from './ExpressRouteDriver';
+import { sentryRequestHandler, sentryErrorHandler } from '../Shared/SentryConnector';
 
 export class ExpressDriver {
   static app = express();
   static start() {
+    // The Sentry Handlers must be first
+    this.app.use(sentryRequestHandler);
+    this.app.use(sentryErrorHandler);
     // configure app to use bodyParser()
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(bodyParser.json());
