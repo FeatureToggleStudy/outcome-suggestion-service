@@ -3,7 +3,9 @@
   "version": "2.1.3",
   "description": "Microservice that suggests user outcomes and standard outcomes",
   "scripts": {
-    "start": "npm run gulp-tsc",
+    "start": "nodemon",
+    "serve": "node -r ts-node/register ./src/app.ts",
+    "serve:debug": "node --inspect=5858 -r ts-node/register ./src/app.ts",
     "test": "jest --verbose  --coverage",
     "db-setup": "npm run build && node ./dist/db-setup/db-setup.script.js",
     "build": "node_modules/.bin/gulp tsc",
@@ -52,24 +54,12 @@
     "natives": "^1.1.3",
     "supertest": "^4.0.2",
     "ts-jest": "^24.0.1",
+    "ts-node": "^8.2.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"
   },
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "**/*.test.ts",
-      "**/*.spec.ts",
-      ".git",
-      "node_modules"
-    ],
-    "watch": [
-      "src"
-    ],
-    "exec": "npm run serve",
-    "ext": "ts"
   }
 }
