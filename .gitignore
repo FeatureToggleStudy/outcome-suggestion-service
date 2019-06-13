@@ -8,3 +8,10 @@ dist/
 dist.zip
 .idea
 coverage
+
+
+.vscode/*
+
+# Include Launch Config for Debugging
+!/.vscode/launch.json
+
