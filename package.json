@@ -1,6 +1,6 @@
 {
   "name": "outcome-suggestion-service",
-  "version": "2.1.3-2",
+  "version": "2.1.3-3",
   "description": "Microservice that suggests user outcomes and standard outcomes",
   "scripts": {
     "start": "nodemon",
