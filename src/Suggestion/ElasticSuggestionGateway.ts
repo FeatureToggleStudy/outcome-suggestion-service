@@ -45,9 +45,7 @@ export class ElasticSuggestionGateway implements SuggestionGateway {
         analyzer: this.analyzers.stop_words,
       },
     };
-    if (limit > 0) {
-      paginator = buildPaginator({ limit, page });
-    }
+    paginator = buildPaginator({ limit, page });
     return { query, ...paginator };
   }
 }

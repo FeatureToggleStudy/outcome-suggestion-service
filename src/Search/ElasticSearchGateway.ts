@@ -62,7 +62,6 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
       [queryKey: string]: any,
     } = {};
     let paginator = { from: 0, size: 0 };
-    const defaultLimit = 20;
     let post_filter: {
       bool: {
         must: any[],
@@ -83,7 +82,6 @@ export class ElasticSearchGateway implements Partial<OutcomeGateway> {
     }
 
 
-    limit = limit || defaultLimit;
     paginator = buildPaginator({ limit, page });
 
     if (fieldQuery.source || fieldQuery.date) {
