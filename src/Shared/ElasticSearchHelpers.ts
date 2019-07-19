@@ -12,6 +12,12 @@ import {
 const ELASTIC_SEARCH_URI = process.env.ELASTIC_SEARCH_URI;
 const GUIDELINE_URI = `${ELASTIC_SEARCH_URI}/enguidelines/_search`;
 
+/**
+ * Default limit is set to 350 to allow a decent sized result set to be returned if client has not specified a limit
+ * This number represents the total number of outcomes from the source with the most outcomes plus an added buffer range
+ */
+const DEFAULT_RESULT_SIZE = 350;
+
 export interface ElasticSearchQuery { [queryKey: string]: any; }
 
 export interface ElasticSearchPaginator {
@@ -114,7 +120,10 @@ function transformRequestError(e: RequestError, message?: string) {
 }
 
 /**
- * Builds pagination object
+ * Builds pagination object which includes the size (Maximum amount of results to return or limit) and from (What section of results to return or page) properties
+ * *** If no limit is defined, the default limit is used. ***
+ * *** from (page) + size (limit) can not be more than the index.max_result_window index setting which defaults to 10,000. ***
+ * *** https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-from-size.html ***
  *
  * @private
  * @param {number} limit [The maximum amount results to return]
@@ -123,7 +132,7 @@ function transformRequestError(e: RequestError, message?: string) {
  * @memberof ElasticSearchGateway
  */
 export function buildPaginator({
-  limit,
+  limit = DEFAULT_RESULT_SIZE,
   page,
 }: {
   limit: number;
