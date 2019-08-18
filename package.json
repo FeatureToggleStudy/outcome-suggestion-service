@@ -29,7 +29,7 @@
     "@cyber4all/clark-schema": "^1.0.2",
     "@sentry/node": "^5.0.6",
     "cors": "^2.8.5",
-    "dotenv": "^6.0.0",
+    "dotenv": "^8.1.0",
     "express": "^4.16.2",
     "express-jwt": "^5.3.0",
     "mongodb": "^3.1.13",
