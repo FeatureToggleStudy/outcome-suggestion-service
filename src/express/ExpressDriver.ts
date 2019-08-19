@@ -41,6 +41,8 @@ export class ExpressDriver {
      */
     const server = http.createServer(this.app);
 
+    server.keepAliveTimeout = parseInt(process.env.KEEP_ALIVE_TIMEOUT, 10);
+
     /**
      * Listen on provided port, on all network interfaces.
      */
